@@ -1,0 +1,6 @@
+target/
+.idea/
+*.iml
+run/
+test-project/
+jqassistant/
