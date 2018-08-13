@@ -9,10 +9,27 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+/**
+ * This class was written to handle nodes in the resulting graph that get referenced more than one
+ * time. These nodes get cached in the {@link DescriptorCache}.
+ * </p>
+ * All of the methods in this class work similar:
+ * </p>
+ * They check if a certain descriptor instance exists. If it does
+ * exist, they return the instance. Otherwise they create a new one and save it in the
+ * {@link Store} and in the {@link DescriptorCache}.
+ */
 public abstract class StoreTool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StoreTool.class);
 
+    /**
+     * Check for {@link GitHubRepository}.
+     *
+     * @param store               The jQAssistant store instance to create a new node.
+     * @param xmlGitHubRepository The GitHub repository information.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubRepository findOrCreateGitHubRepository(Store store, XMLGitHubRepository xmlGitHubRepository) {
 
         GitHubRepository repository = DescriptorCache.getInstance().get(xmlGitHubRepository);
@@ -31,6 +48,22 @@ public abstract class StoreTool {
         return repository;
     }
 
+    /**
+     * Check for {@link GitHubIssue}.
+     * </p>
+     * This method works a little bit different as it only has the ID of the Issue. If it can't find
+     * the Issue in the {@link DescriptorCache} it will load the information from the GitHub-API using
+     * the {@link RestTool}. After that it falls back to the common case:
+     * {@link #findOrCreateGitHubIssue(Store, JSONIssue, XMLGitHubRepository)}.
+     *
+     * @param store               The jQAssistant store instance to create a new node.
+     * @param repoUser            The owner of the repository.
+     * @param repoName            The name of the repository.
+     * @param issueNumber         The number of the issue.
+     * @param xmlGitHubRepository The plugin configuration for the current repository.
+     * @return The retrieved or newly created descriptor instance.
+     * @throws IOException If the parsing of the issue JSON failed.
+     */
     static GitHubIssue findOrCreateGitHubIssue(
             Store store,
             String repoUser,
@@ -55,6 +88,14 @@ public abstract class StoreTool {
         return gitHubIssue;
     }
 
+    /**
+     * Check for {@link GitHubIssue}.
+     *
+     * @param store               The jQAssistant store instance to create a new node.
+     * @param jsonIssue           The GitHub issue information.
+     * @param xmlGitHubRepository The GitHub repository information, needed to identify the issue.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubIssue findOrCreateGitHubIssue(
             Store store,
             JSONIssue jsonIssue,
@@ -88,6 +129,13 @@ public abstract class StoreTool {
         return gitHubIssue;
     }
 
+    /**
+     * Check for {@link GitHubUser}.
+     *
+     * @param store    The jQAssistant store instance to create a new node.
+     * @param jsonUser The GitHub user information.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubUser findOrCreateGitHubUser(Store store, JSONUser jsonUser) {
 
         GitHubUser user = DescriptorCache.getInstance().get(jsonUser);
@@ -103,6 +151,13 @@ public abstract class StoreTool {
         return user;
     }
 
+    /**
+     * Check for {@link GitHubLabel}.
+     *
+     * @param store     The jQAssistant store instance to create a new node.
+     * @param jsonLabel The GitHub label information.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubLabel findOrCreateGitHubLabel(Store store, JSONLabel jsonLabel) {
 
         GitHubLabel label = DescriptorCache.getInstance().get(jsonLabel);
@@ -119,6 +174,14 @@ public abstract class StoreTool {
         return label;
     }
 
+    /**
+     * Check for {@link GitHubMilestone}.
+     *
+     * @param store               The jQAssistant store instance to create a new node.
+     * @param jsonMilestone       The GitHub milestone information.
+     * @param xmlGitHubRepository The GitHub repository information, needed to identify the milestone.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubMilestone findOrCreateGitHubMilestone(Store store, JSONMilestone jsonMilestone, XMLGitHubRepository xmlGitHubRepository) {
 
         GitHubMilestone milestone = DescriptorCache.getInstance().get(jsonMilestone, xmlGitHubRepository);
@@ -144,6 +207,15 @@ public abstract class StoreTool {
         return milestone;
     }
 
+    /**
+     * Check for {@link GitHubCommit}.
+     *
+     * @param store     The jQAssistant store instance to create a new node.
+     * @param repoUser  The owner of the repository.
+     * @param repoName  The name of the repository.
+     * @param commitSha The hash of the commit.
+     * @return The retrieved or newly created descriptor instance.
+     */
     public static GitHubCommit findOrCreateGitHubCommit(Store store, String repoUser, String repoName, String commitSha) {
 
         GitHubCommit commit = DescriptorCache.getInstance().getCommit(repoUser, repoName, commitSha);

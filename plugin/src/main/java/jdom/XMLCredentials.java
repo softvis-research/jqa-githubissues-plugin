@@ -7,5 +7,6 @@ import lombok.Getter;
 @Getter
 public class XMLCredentials {
 
-    private String user, password;
+    private String user;
+    private String password;
 }

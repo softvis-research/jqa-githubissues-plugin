@@ -12,6 +12,14 @@ import java.util.List;
 
 public abstract class XMLParser {
 
+    /**
+     * Parses the plugin configuration file.
+     *
+     * @param inputStream The InputStream that shall be used.
+     * @return A list of repository configurations.
+     * @throws JDOMException If XML parsing failed.
+     * @throws IOException   If reading the config file failed.
+     */
     public static List<XMLGitHubRepository> parseConfiguration(InputStream inputStream) throws JDOMException, IOException {
 
         List<XMLGitHubRepository> repositoryList = new ArrayList<>();

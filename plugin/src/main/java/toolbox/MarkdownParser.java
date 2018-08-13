@@ -22,6 +22,24 @@ public abstract class MarkdownParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkdownParser.class);
 
+    /**
+     * This function parses bodies of descriptors that contain markdown information, e.g. issues
+     * or comments.
+     * </p>
+     * The following references get resolved:
+     * <ul>
+     * <li>Commits,</li>
+     * <li>Issues</li>
+     * <li>and Users.</li>
+     * </ul>
+     * IMPORTANT: The depth for resolving references is 1!
+     *
+     * @param store                 The jQAssistant store to create new nodes.
+     * @param markdown              The markdown that shall be parsed.
+     * @param gitHubMarkdownPointer The descriptor containing this markdown.
+     * @param xmlGitHubRepository   The repository context from the plugin configuration.
+     * @throws IOException If the parsing of an issue request fails.
+     */
     public static void getReferencesInMarkdown(
             Store store,
             String markdown,
