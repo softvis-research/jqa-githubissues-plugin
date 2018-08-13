@@ -4,6 +4,8 @@ import com.buschmais.xo.neo4j.api.annotation.Label;
 import com.buschmais.xo.neo4j.api.annotation.Property;
 import com.buschmais.xo.neo4j.api.annotation.Relation;
 
+import java.time.ZonedDateTime;
+
 @Label("Milestone")
 public interface GitHubMilestone extends GitHub {
 
@@ -28,16 +30,16 @@ public interface GitHubMilestone extends GitHub {
     void setNumber(int number);
 
     @Property("createdAt")
-    String getCreatedAt();
-    void setCreatedAt(String createdAt);
+    ZonedDateTime getCreatedAt();
+    void setCreatedAt(ZonedDateTime createdAt);
 
     @Property("updatedAt")
-    String getUpdatedAt();
-    void setUpdatedAt(String updatedAt);
+    ZonedDateTime getUpdatedAt();
+    void setUpdatedAt(ZonedDateTime updatedAt);
 
     @Property("dueOn")
-    String getDueOn();
-    void setDueOn(String dueOn);
+    ZonedDateTime getDueOn();
+    void setDueOn(ZonedDateTime dueOn);
 
     @Relation("CREATED_BY")
     GitHubUser getCreatedBy();

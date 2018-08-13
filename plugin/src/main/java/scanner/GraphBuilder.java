@@ -12,6 +12,7 @@ import toolbox.RestTool;
 import toolbox.StoreTool;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -105,7 +106,10 @@ class GraphBuilder {
             JSONIssue jsonPullRequest = JSONParser.getInstance().parsePullRequest(response);
 
             GitHubPullRequest gitHubPullRequest = (GitHubPullRequest) gitHubIssue;
-            gitHubPullRequest.setMergedAt(jsonPullRequest.getMergedAt());
+
+            if (jsonPullRequest.getMergedAt() != null) {
+                gitHubPullRequest.setMergedAt(ZonedDateTime.parse(jsonPullRequest.getMergedAt()));
+            }
 
             GitHubCommit gitHubCommit = StoreTool.findOrCreateGitHubCommit(
                     store,
@@ -146,8 +150,8 @@ class GraphBuilder {
 
             GitHubComment comment = store.create(GitHubComment.class);
             comment.setBody(jsonComment.getBody());
-            comment.setCreatedAt(jsonComment.getCreatedAt());
-            comment.setUpdatedAt(jsonComment.getUpdatedAt());
+            comment.setCreatedAt(ZonedDateTime.parse(jsonComment.getCreatedAt()));
+            comment.setUpdatedAt(ZonedDateTime.parse(jsonComment.getUpdatedAt()));
 
             comment.setUser(StoreTool.findOrCreateGitHubUser(store, jsonComment.getUser()));
 

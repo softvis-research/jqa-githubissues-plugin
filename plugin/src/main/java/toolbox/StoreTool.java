@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 
 /**
  * This class was written to handle nodes in the resulting graph that get referenced more than one
@@ -116,8 +117,8 @@ public abstract class StoreTool {
             gitHubIssue.setIssueId(xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "#" + jsonIssue.getNumber());
             gitHubIssue.setBody(jsonIssue.getBody());
             gitHubIssue.setComments(jsonIssue.getComments());
-            gitHubIssue.setCreatedAt(jsonIssue.getCreatedAt());
-            gitHubIssue.setUpdatedAt(jsonIssue.getUpdatedAt());
+            gitHubIssue.setCreatedAt(ZonedDateTime.parse(jsonIssue.getCreatedAt()));
+            gitHubIssue.setUpdatedAt(ZonedDateTime.parse(jsonIssue.getUpdatedAt()));
             gitHubIssue.setLocked(jsonIssue.isLocked());
             gitHubIssue.setNumber(jsonIssue.getNumber());
             gitHubIssue.setState(jsonIssue.getState());
@@ -193,9 +194,13 @@ public abstract class StoreTool {
             milestone.setMilestoneId(xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "#" + jsonMilestone.getNumber());
             milestone.setTitle(jsonMilestone.getTitle());
             milestone.setDescription(jsonMilestone.getDescription());
-            milestone.setCreatedAt(jsonMilestone.getCreatedAt());
-            milestone.setUpdatedAt(jsonMilestone.getUpdatedAt());
-            milestone.setDueOn(jsonMilestone.getDueOn());
+            milestone.setCreatedAt(ZonedDateTime.parse(jsonMilestone.getCreatedAt()));
+            milestone.setUpdatedAt(ZonedDateTime.parse(jsonMilestone.getUpdatedAt()));
+
+            if (jsonMilestone.getDueOn() != null) {
+                milestone.setDueOn(ZonedDateTime.parse(jsonMilestone.getDueOn()));
+            }
+
             milestone.setState(jsonMilestone.getState());
             milestone.setNumber(jsonMilestone.getNumber());
 

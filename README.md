@@ -150,19 +150,55 @@ ORDER BY
     pathLength DESC, i.state DESC
 ```
 
+Show durations it needed to resolve an issue:
+```java
+WITH
+    issue, duration.inDays(date(issue.createdAt), date(issue.updatedAt)).days AS duration
+RETURN 
+    issue.issueId, issue.title, duration + " days" AS timToSolve
+ORDER BY
+    duration DESC
+```
+
+Show issues older than 1 month that are still open:
+```java
+MATCH
+    (issue:Issue {state:"open"})
+WHERE
+    date(issue.createdAt) <= date('20180713')
+RETURN 
+    *
+```
+
+#### Why are these issues still open?
+
+Let's have a look at a few indicators:
+
+- Do these Issues have labels?
+```java
+MATCH
+    (issue:Issue {state:"open"})
+WHERE
+    date(issue.createdAt) <= date('20180713') AND NOT (issue:Issue)-[:HAS_LABEL]->()
+RETURN 
+    *
+```
+&rarr; If not, then probably no one looked at these issues.
+
+- Is anyone assigned to this issue?
+```java
+MATCH
+    (issue:Issue {state:"open"})
+WHERE
+    date(issue.createdAt) <= date('20180713') AND NOT (issue:Issue)-[:HAS_ASSIGNEE]->(:User)
+RETURN 
+    issue
+```
+&rarr; If not, then probably no one feels responsible for this issue.
+
+
 ## Development
 
-Scan a _.jar_ artifact:
-```bash
-# Remove the old Neo4J database
-rm -r jqassistant
-
-# Scan the artifact
-run/jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh scan -f test-project/target/test-project-1.0-SNAPSHOT.jar
-
-# Start the Neo4J Web-UI
-run/jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh server
-```
 
 Build the __GitHub-Issues__ plugin:
 ```bash

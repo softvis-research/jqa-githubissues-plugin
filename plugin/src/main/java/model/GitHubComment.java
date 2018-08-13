@@ -4,6 +4,8 @@ import com.buschmais.xo.neo4j.api.annotation.Label;
 import com.buschmais.xo.neo4j.api.annotation.Property;
 import com.buschmais.xo.neo4j.api.annotation.Relation;
 
+import java.time.ZonedDateTime;
+
 @Label("Comment")
 public interface GitHubComment extends GitHub, GitHubMarkdownPointer {
 
@@ -12,12 +14,12 @@ public interface GitHubComment extends GitHub, GitHubMarkdownPointer {
     void setBody(String body);
 
     @Property("createdAt")
-    String getCreatedAt();
-    void setCreatedAt(String createdAt);
+    ZonedDateTime getCreatedAt();
+    void setCreatedAt(ZonedDateTime createdAt);
 
     @Property("updatedAt")
-    String getUpdatedAt();
-    void setUpdatedAt(String updatedAt);
+    ZonedDateTime getUpdatedAt();
+    void setUpdatedAt(ZonedDateTime updatedAt);
 
     @Relation("CREATED_BY")
     GitHubUser getUser();
