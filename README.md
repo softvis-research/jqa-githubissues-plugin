@@ -3,11 +3,16 @@
 [![GitHub license](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/b-pos465/jqa-githubissues-plugin/blob/master/LICENSE)
 [![Build Status](https://travis-ci.com/b-pos465/jqa-githubissues-plugin.svg?branch=master)](https://travis-ci.com/b-pos465/jqa-githubissues-plugin)
 
-This is a GitHub issue scanner for [jQAssistant](https://jqassistant.org/). It enables jQAssistant to scan and analyze GitHub issues.
+This is a GitHub issue scanner for [jQAssistant](https://jqassistant.org/). 
+It enables jQAssistant to scan and analyze GitHub issues.
 
 ## Getting Started
 
-Create a _githubissues.xml_:
+To use the __GitHub-Issues__ plugin create a file named `githubissues.xml`. 
+The plugin can scan multiple repositories owned by different users. Please note that
+the [GitHub REST-API](https://developer.github.com/v3/) requires login credentials to
+access any of its functions. Therefore, login credentials can be provided per 
+repository.
 
 ```xml
 <github-repositories>
@@ -27,6 +32,22 @@ Create a _githubissues.xml_:
 </github-repositories>
 ```
 
+Put the `githubissues.xml` inside an artifact that shall be scanned 
+or simply scan it standalone:
+
+
+### Standalone 
+Download [jQAssistant](https://jqassistant.org/get-started/) for command line usage
+and put the plugin _JAR_ in the `plugins` folder. Then run:
+
+```bash
+# Scan the GitHub-Repositories
+jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh scan -f githubissues.xml
+
+# Start a Neo4J web UI to explore the result: 
+jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh server
+```
+
 ## Labels
 
 The __GitHub-Issues__ plugin uses the following labels in the resulting graph:
@@ -42,19 +63,25 @@ The __GitHub-Issues__ plugin uses the following labels in the resulting graph:
 |User|Represents a GitHub User.| "user-name" |
 |Commit|Represents a GitHub Commit.| "repo-user/repo-name#commit-sha" |
 
-Here you can find possible relations between those labels:
+Here are the possible relations between those labels:
 
-```mysql
+```java
 (Repository)  -[:HAS_ISSUE]       ->    (Issue)
 (Repository)  -[:HAS_MILESTONE]   ->    (Milestone)
-(Issue)       -[:CREATED_BY]      ->    (User)
-(Issue)       -[:HAS_ASSIGNEE]    ->    (User)
-(Issue)       -[:IS_PART_OF]      ->    (Milestone)
+
+(Issue)       -[:HAS_LABEL]       ->    (Label)
 (Issue)       -[:HAS_COMMENT]     ->    (Comment)
+(Issue)       -[:HAS_ASSIGNEE]    ->    (User)
+(Issue)       -[:CREATED_BY]      ->    (User)
+(Issue)       -[:IS_PART_OF]      ->    (Milestone)
 
+(PullRequest) -[:HAS_LAST_COMMIT] ->    (Commit)
+
+(Milestone)   -[:CREATED_BY]      ->    (User)
+
+(Comment)     -[:FOLLOWED_BY]     ->    (Comment)
+(Comment)     -[:CREATED_BY]      ->    (User)
 ```
-
-
 
 ## Use Cases
 
@@ -62,7 +89,7 @@ Here you can find possible relations between those labels:
 
 List all your open Issues over multiple repositories:
 
-```mysql
+```java
 MATCH
     (r:Repository)-[:HAS_ISSUE]->(i:Issue {state:"open"})
 RETURN
@@ -71,7 +98,7 @@ RETURN
 
 Count open Issues per repository:
 
-```mysql
+```java
 MATCH
     (r:Repository)-[:HAS_ISSUE]->(Issue {state:"open"})
 RETURN
@@ -82,7 +109,7 @@ ORDER BY
 
 List open issues per user:
 
-```mysql
+```java
 MATCH
     (Issue {state:"open"})-[:HAS_ASSIGNEE]->(u:User)
 RETURN
@@ -93,7 +120,7 @@ RETURN
 
 Show issues without description:
 
-```mysql
+```java
 MATCH
     (i:Issue)
 WHERE
@@ -104,7 +131,7 @@ RETURN
 
 Show issues without labels:
 
-```mysql
+```java
 MATCH 
     (i:Issue)
 WHERE 
@@ -113,8 +140,8 @@ RETURN
     i.title, i.issueId
 ```
 
-Show issues ordered descanding by the amount of coments:
-```mysql
+Show issues ordered descending by the amount of comments:
+```java
 MATCH 
     path=((i:Issue)-[:HAS_COMMENT]->()-[:FOLLOWED_BY*]->())
 RETURN

@@ -11,7 +11,7 @@ public interface GitHubPullRequest extends GitHubIssue {
     String getMergedAt();
     void setMergedAt(String mergedAt);
 
-    @Relation("LAST_COMMIT")
+    @Relation("HAS_LAST_COMMIT")
     GitHubCommit getLastCommit();
     void setLastCommit(GitHubCommit lastCommit);
 }
