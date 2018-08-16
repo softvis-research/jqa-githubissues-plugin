@@ -75,7 +75,7 @@ public abstract class StoreTool {
         GitHubIssue gitHubIssue = DescriptorCache.getInstance().getIssue(repoUser, repoName, issueNumber);
 
         if (gitHubIssue == null) {
-            LOGGER.info("Creating new issue: " + repoUser + "/" + repoName + "#" + issueNumber);
+            LOGGER.debug("Creating new issue: " + repoUser + "/" + repoName + "#" + issueNumber);
             String response = RestTool.getInstance().requestIssueByRepositoryAndNumber(
                     repoUser,
                     repoName,

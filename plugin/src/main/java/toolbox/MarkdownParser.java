@@ -47,13 +47,20 @@ public abstract class MarkdownParser {
             XMLGitHubRepository xmlGitHubRepository) throws IOException {
 
         try {
+            // https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-abuse-rate-limits
+            Thread.sleep(1000);
+
+            LOGGER.debug("MARKDOWN:\n" + markdown + "\n");
+
             String html = RestTool.getInstance().requestMarkdownToHtml(markdown, xmlGitHubRepository);
+
+            LOGGER.debug("HTML:\n" + html + "\n");
 
             Document htmlDocument = Jsoup.parse(html);
 
             for (Element issueElement : htmlDocument.select("a.issue-link")) {
 
-                List<String> hrefCut = removeDispensableHrefPartsAndCutIt(issueElement.attr("href"));
+                List<String> hrefCut = removeDispensableHrefPartsAndCutIt(issueElement.attr("data-url"));
 
                 gitHubMarkdownPointer.getGitHubIssues().add(
                         StoreTool.findOrCreateGitHubIssue(
@@ -84,8 +91,15 @@ public abstract class MarkdownParser {
             }
 
 
-        } catch (JsonProcessingException | UniformInterfaceException e) {
+        } catch (JsonProcessingException e) {
             LOGGER.error("Converting markdown to html threw an error:", e);
+        } catch (UniformInterfaceException e) {
+
+            LOGGER.error("Converting markdown to html threw an UniformInterfaceException: \"" + e.getMessage() + "\"");
+            LOGGER.error("Entity:\n\n" + e.getResponse().getEntity(String.class));
+            LOGGER.error("Header Retry-After: " + e.getResponse().getHeaders().get("Retry-After") + " s");
+        } catch (InterruptedException e) {
+            LOGGER.error("InterruptedException: ", e);
         }
     }
 

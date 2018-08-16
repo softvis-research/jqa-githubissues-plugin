@@ -67,7 +67,11 @@ class GraphBuilder {
 
 
         for (JSONIssue jsonIssue : jsonIssues) {
-            LOGGER.info("Importing issue: \"" + jsonIssue.getTitle() + "\"");
+            String id = xmlGitHubRepository.getUser() +
+                    "/" + xmlGitHubRepository.getName() +
+                    "#" +jsonIssue.getNumber();
+
+            LOGGER.info("Importing issue: " + id + ", \"" + jsonIssue.getTitle() + "\"");
 
             GitHubIssue gitHubIssue = issueLevel(store, jsonIssue, xmlGitHubRepository);
 
