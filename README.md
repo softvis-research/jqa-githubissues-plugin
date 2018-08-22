@@ -2,6 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/b-pos465/jqa-githubissues-plugin/blob/master/LICENSE)
 [![Build Status](https://travis-ci.com/b-pos465/jqa-githubissues-plugin.svg?branch=master)](https://travis-ci.com/b-pos465/jqa-githubissues-plugin)
+[![codecov](https://codecov.io/gh/b-pos465/jqa-githubissues-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/b-pos465/jqa-githubissues-plugin)
 
 This is a GitHub issue scanner for [jQAssistant](https://jqassistant.org/). 
 It enables jQAssistant to scan and analyze GitHub issues.

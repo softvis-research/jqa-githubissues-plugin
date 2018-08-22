@@ -2,9 +2,7 @@ package scanner.stubbing;
 
 import java.io.IOException;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 public abstract class StubbingTool {
 
@@ -12,23 +10,47 @@ public abstract class StubbingTool {
 
         stubMilestones();
         stubIssues();
+        stubPullRequest();
+        stubComments();
+        stubMarkdown();
+        stubSingleIssue();
     }
 
     private static void stubMilestones() throws IOException {
-
-        stubFor(get("/repos/github-user/github-repository/milestones?state=all")
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(JSONReader.readJsonInResources("milestones.json"))));
+        stub("/repos/github-user/github-repository/milestones?state=all", "rest-mocks/milestones.json");
     }
 
     private static void stubIssues() throws IOException {
+        stub("/repos/github-user/github-repository/issues?state=all", "rest-mocks/issues.json");
+    }
 
-        stubFor(get("/repos/github-user/github-repository/issues?state=all")
+    private static void stubPullRequest() throws IOException {
+        stub("/repos/octocat/Hello-World/pulls/1347", "rest-mocks/pullrequest.json");
+    }
+
+    private static void stubComments() throws IOException {
+        stub("/repos/github-user/github-repository/issues/1347/comments", "rest-mocks/comments.json");
+    }
+
+    private static void stubMarkdown() throws IOException {
+
+        stubFor(post("/markdown")
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(JSONReader.readJsonInResources("issues.json"))));
+                        .withBody(FileReader.readFileInResources("rest-mocks/markdown.html"))));
+    }
+
+    private static void stubSingleIssue() throws IOException {
+        stub("/repos/octocat/Hello-World/issues/1347", "rest-mocks/issue.json");
+    }
+
+    private static void stub(String url, String fileName) throws IOException {
+
+        stubFor(get(url)
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(FileReader.readFileInResources(fileName))));
     }
 }

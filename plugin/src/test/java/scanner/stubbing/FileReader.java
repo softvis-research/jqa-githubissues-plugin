@@ -3,11 +3,11 @@ package scanner.stubbing;
 import java.io.*;
 import java.util.Objects;
 
-abstract class JSONReader {
+abstract class FileReader {
 
-    static String readJsonInResources(String fileName) throws IOException {
+    static String readFileInResources(String fileName) throws IOException {
 
-        ClassLoader classLoader = JSONReader.class.getClassLoader();
+        ClassLoader classLoader = FileReader.class.getClassLoader();
         File file = new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
 
 
