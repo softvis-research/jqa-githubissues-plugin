@@ -200,8 +200,10 @@ RETURN
 
 ## Development
 
+If you want to contribute here are a few tips to get you started:
 
 Build the __GitHub-Issues__ plugin:
+
 ```bash
 cd plugin
 
@@ -209,6 +211,12 @@ cd plugin
 mvn clean package
 
 # Copy the resulting JAR into the jQAssistant CLI plugins folder
-cp target/jqa-githubissues-plugin-1.0-SNAPSHOT-jar-with-dependencies.jar ../run/jqassistant-commandline-neo4jv3-1.4.0/plugins/
-
+cp target/jqa-githubissues-plugin-0.1-jar-with-dependencies.jar ../run/jqassistant-commandline-neo4jv3-1.4.0/plugins/
 ```
+Run code coverage via [Corbertura](http://cobertura.github.io/cobertura/):
+
+```bash
+mvn cobertura:cobertura
+```
+
+The coverage reports can be found under `target/site/cobertura`.

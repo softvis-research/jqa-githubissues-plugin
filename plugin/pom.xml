@@ -6,7 +6,7 @@
 
     <groupId>de.uni-leipzig.softvis-research</groupId>
     <artifactId>jqa-githubissues-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,7 +44,6 @@
             <artifactId>jersey-client</artifactId>
             <version>1.19.4</version>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.jdom/jdom2 -->
         <dependency>
