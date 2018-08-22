@@ -4,7 +4,6 @@ import jdom.XMLGitHubRepository;
 import lombok.*;
 
 @Getter
-@ToString
 public class JSONMarkdownRequest {
 
     private String text;
