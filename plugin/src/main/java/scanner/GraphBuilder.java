@@ -103,7 +103,7 @@ class GraphBuilder {
         */
         if (jsonIssue.getPullRequest() != null) {
 
-            String response = RestTool.getInstance().requestAbsoluteUrl(
+            String response = RestTool.getInstance().requestPullRequestByAbsoluteUrl(
                     jsonIssue.getPullRequest().getUrl(),
                     xmlGitHubRepository);
 

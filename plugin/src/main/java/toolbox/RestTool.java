@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 
 public class RestTool {
 
-    private static final String GITHUB_API = "https://api.github.com/";
+    public static String GITHUB_API = "https://api.github.com/";
 
     private static RestTool instance;
     private Client client;
@@ -141,7 +141,7 @@ public class RestTool {
      * @return The response as JSON-String.
      * @see <a href="https://developer.github.com/v3/pulls/#get-a-single-pull-request">REST-API</a>
      */
-    public String requestAbsoluteUrl(String url, XMLGitHubRepository xmlGitHubRepository) {
+    public String requestPullRequestByAbsoluteUrl(String url, XMLGitHubRepository xmlGitHubRepository) {
 
         setAuthFilter(xmlGitHubRepository);
 

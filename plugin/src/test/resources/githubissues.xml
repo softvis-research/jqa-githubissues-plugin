@@ -1,0 +1,11 @@
+<github-repositories>
+    <github-repository>
+        <user>github-user</user>
+        <name>github-repository</name>
+
+        <credentials>
+            <user>other-github-user</user>
+            <password>secret</password>
+        </credentials>
+    </github-repository>
+</github-repositories>
