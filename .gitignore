@@ -4,3 +4,4 @@ target/
 run/
 test-project/
 jqassistant/
+dependency-reduced-pom.xml
