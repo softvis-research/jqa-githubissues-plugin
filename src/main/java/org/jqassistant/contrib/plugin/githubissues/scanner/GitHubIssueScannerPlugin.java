@@ -9,7 +9,7 @@ import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FileResour
 import org.jdom2.JDOMException;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLParser;
-import org.jqassistant.contrib.plugin.githubissues.model.GitHub;
+import org.jqassistant.contrib.plugin.githubissues.model.GitHubIssuesConfigurationFile;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 @ScannerPlugin.Requires(FileDescriptor.class)
-public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource, GitHub> {
+public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource, GitHubIssuesConfigurationFile> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitHubIssueScannerPlugin.class);
 
@@ -48,7 +48,7 @@ public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource
     }
 
     @Override
-    public GitHub scan(FileResource item, String path, Scope scope, Scanner scanner) throws IOException {
+    public GitHubIssuesConfigurationFile scan(FileResource item, String path, Scope scope, Scanner scanner) throws IOException {
 
         LOGGER.debug(String.format("GitHub-Issues plugin scans file %s.", path));
 
@@ -72,15 +72,15 @@ public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource
         }
 
         FileDescriptor fileDescriptor = scanner.getContext().getCurrentDescriptor();
-        final GitHub gitHubIssuesDescriptor = scanner
+        final GitHubIssuesConfigurationFile gitHubIssuesConfigurationFile = scanner
                 .getContext()
                 .getStore()
-                .addDescriptorType(fileDescriptor, GitHub.class);
+                .addDescriptorType(fileDescriptor, GitHubIssuesConfigurationFile.class);
 
         GraphBuilder graphBuilder = new GraphBuilder(scanner.getContext().getStore(), this.apiUrl, cacheEndpoint);
 
-        graphBuilder.startTraversal(gitHubIssuesDescriptor, xmlRepositoryList);
+        graphBuilder.startTraversal(gitHubIssuesConfigurationFile, xmlRepositoryList);
 
-        return gitHubIssuesDescriptor;
+        return gitHubIssuesConfigurationFile;
     }
 }

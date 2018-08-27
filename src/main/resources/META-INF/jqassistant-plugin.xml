@@ -13,6 +13,7 @@
         <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubCommit</class>
         <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubPullRequest</class>
         <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubMarkdownPointer</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubIssuesConfigurationFile</class>
     </model>
     <scanner>
         <class>org.jqassistant.contrib.plugin.githubissues.scanner.GitHubIssueScannerPlugin</class>

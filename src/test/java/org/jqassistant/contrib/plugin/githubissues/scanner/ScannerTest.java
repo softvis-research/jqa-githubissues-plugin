@@ -7,6 +7,7 @@ import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.jqassistant.contrib.plugin.githubissues.model.GitHub;
 import org.hamcrest.CoreMatchers;
+import org.jqassistant.contrib.plugin.githubissues.model.GitHubIssuesConfigurationFile;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jqassistant.contrib.plugin.githubissues.scanner.stubbing.StubbingTool;
@@ -37,14 +38,14 @@ public class ScannerTest extends AbstractPluginIT {
 
         Descriptor descriptor = getScanner().scan(file, "/githubissues.xml", DefaultScope.NONE);
 
-        assertThat(descriptor, CoreMatchers.instanceOf(GitHub.class));
+        assertThat(descriptor, CoreMatchers.instanceOf(GitHubIssuesConfigurationFile.class));
 
-        GitHub gitHub = (GitHub) descriptor;
-        assertEquals(1, gitHub.getContains().size());
+        GitHubIssuesConfigurationFile gitHubIssuesConfigurationFile = (GitHubIssuesConfigurationFile) descriptor;
+        assertEquals(1, gitHubIssuesConfigurationFile.getRepositories().size());
 
-        assertEquals("github-user", gitHub.getContains().get(0).getUser());
-        assertEquals(1, gitHub.getContains().get(0).getMilestones().size());
-        assertEquals(1, gitHub.getContains().get(0).getContains().size());
+        assertEquals("github-user", gitHubIssuesConfigurationFile.getRepositories().get(0).getUser());
+        assertEquals(1, gitHubIssuesConfigurationFile.getRepositories().get(0).getMilestones().size());
+        assertEquals(1, gitHubIssuesConfigurationFile.getRepositories().get(0).getContains().size());
 
         TestResult testResult = query(
                 "MATCH\n" +

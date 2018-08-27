@@ -10,7 +10,7 @@ import com.buschmais.xo.neo4j.api.annotation.Relation;
 import java.util.List;
 
 @Label("Repository")
-public interface GitHubRepository extends Descriptor, NamedDescriptor {
+public interface GitHubRepository extends GitHub, Descriptor, NamedDescriptor {
 
     @Property("repositoryId")
     String getRepositoryId();

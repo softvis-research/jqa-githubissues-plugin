@@ -32,7 +32,8 @@ class GraphBuilder {
         markdownParser = new MarkdownParser(cacheEndpoint);
     }
 
-    void startTraversal(GitHub gitHub, List<XMLGitHubRepository> xmlGitHubRepositories) throws IOException {
+    void startTraversal(GitHubIssuesConfigurationFile gitHubIssuesConfigurationFile,
+                        List<XMLGitHubRepository> xmlGitHubRepositories) throws IOException {
 
         for (XMLGitHubRepository xmlGitHubRepository : xmlGitHubRepositories) {
 
@@ -44,7 +45,7 @@ class GraphBuilder {
 
             repositoryLevel(store, gitHubRepository, xmlGitHubRepository);
 
-            gitHub.getContains().add(gitHubRepository);
+            gitHubIssuesConfigurationFile.getRepositories().add(gitHubRepository);
         }
     }
 

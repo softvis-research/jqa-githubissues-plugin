@@ -6,12 +6,12 @@ import java.util.Set;
 
 public interface GitHubMarkdownPointer {
 
-    @Relation("POINTS_AT")
+    @Relation("REFERENCES_ISSUE")
     Set<GitHubIssue> getGitHubIssues();
 
-    @Relation("POINTS_AT")
+    @Relation("REFERENCES_COMMIT")
     Set<GitHubCommit> getGitHubCommits();
 
-    @Relation("POINTS_AT")
+    @Relation("REFERENCES_USER")
     Set<GitHubUser> getGitHubUsers();
 }
