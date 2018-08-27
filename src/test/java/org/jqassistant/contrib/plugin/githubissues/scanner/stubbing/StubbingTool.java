@@ -1,6 +1,9 @@
 package org.jqassistant.contrib.plugin.githubissues.scanner.stubbing;
 
-import java.io.IOException;
+import org.apache.commons.io.IOUtils;
+
+import java.io.*;
+import java.util.Objects;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -34,11 +37,13 @@ public abstract class StubbingTool {
 
     private static void stubMarkdown() throws IOException {
 
+        InputStream in = getInputStreamFromFile("rest-mocks/markdown.html");
+
         stubFor(post("/markdown")
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/org.jqassistant.contrib.plugin.githubissues.json")
-                        .withBody(FileReader.readFileInResources("rest-mocks/markdown.html"))));
+                        .withBody(IOUtils.toString(in))));
     }
 
     private static void stubSingleIssue() throws IOException {
@@ -47,10 +52,20 @@ public abstract class StubbingTool {
 
     private static void stub(String url, String fileName) throws IOException {
 
+        InputStream in = getInputStreamFromFile(fileName);
+
         stubFor(get(url)
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", "application/org.jqassistant.contrib.plugin.githubissues.json")
-                        .withBody(FileReader.readFileInResources(fileName))));
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(IOUtils.toString(in))));
+    }
+
+    private static InputStream getInputStreamFromFile(String fileName) throws FileNotFoundException {
+
+        ClassLoader classLoader = StubbingTool.class.getClassLoader();
+        File file = new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
+
+        return new FileInputStream(file);
     }
 }
