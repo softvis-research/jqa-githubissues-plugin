@@ -16,7 +16,7 @@ access any of its functions. Therefore, login credentials can be provided per
 repository.
 
 ```xml
-<github-repositories>
+<github-issues-configuration>
     <github-repository>
         <user>github-user</user>
         <name>github-repository-name</name>
@@ -30,7 +30,7 @@ repository.
     <github-repository>
         ...
     </github-repository>
-</github-repositories>
+</github-issues-configuration>
 ```
 
 Put the `githubissues.xml` inside an artifact that shall be scanned 
