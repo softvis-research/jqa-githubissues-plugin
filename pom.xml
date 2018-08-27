@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?org.jqassistant.contrib.plugin.githubissues.xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -139,7 +139,7 @@
                 <configuration>
                     <formats>
                         <format>html</format>
-                        <format>xml</format>
+                        <format>githubissues.xml</format>
                     </formats>
                     <check />
                 </configuration>

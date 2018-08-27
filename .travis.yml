@@ -1,8 +1,5 @@
 language: java
 
-before_install:
-  - cd plugin
-
 script: "mvn cobertura:cobertura"
 
 after_success:

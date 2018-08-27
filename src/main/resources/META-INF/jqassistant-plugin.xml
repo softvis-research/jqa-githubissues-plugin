@@ -1,0 +1,20 @@
+<jqa-plugin:jqassistant-plugin
+        xmlns:jqa-plugin="http://www.buschmais.com/jqassistant/core/plugin/schema/v1.1"
+        name="GitHub-Issues">
+    <description>Provides a scanner for GitHub Issues.</description>
+    <model>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHub</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubMilestone</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubIssue</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubRepository</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubLabel</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubUser</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubComment</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubCommit</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubPullRequest</class>
+        <class>org.jqassistant.contrib.plugin.githubissues.model.GitHubMarkdownPointer</class>
+    </model>
+    <scanner>
+        <class>org.jqassistant.contrib.plugin.githubissues.scanner.GitHubIssueScannerPlugin</class>
+    </scanner>
+</jqa-plugin:jqassistant-plugin>
