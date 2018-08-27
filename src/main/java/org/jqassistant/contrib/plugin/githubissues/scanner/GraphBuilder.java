@@ -3,29 +3,36 @@ package org.jqassistant.contrib.plugin.githubissues.scanner;
 import com.buschmais.jqassistant.core.store.api.Store;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
-import lombok.AllArgsConstructor;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.MarkdownParser;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.MarkdownParser;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.StoreTool;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@AllArgsConstructor
 class GraphBuilder {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(GraphBuilder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphBuilder.class);
 
     private Store store;
-    private List<XMLGitHubRepository> xmlGitHubRepositories;
-    private GitHub gitHub;
     private String apiUrl;
+    private CacheEndpoint cacheEndpoint;
+    private MarkdownParser markdownParser;
 
-    void startTraversal() throws IOException {
+    GraphBuilder(Store store, String apiUrl, CacheEndpoint cacheEndpoint) {
+
+        this.store = store;
+        this.apiUrl = apiUrl;
+        this.cacheEndpoint = cacheEndpoint;
+
+        markdownParser = new MarkdownParser(cacheEndpoint);
+    }
+
+    void startTraversal(GitHub gitHub, List<XMLGitHubRepository> xmlGitHubRepositories) throws IOException {
 
         for (XMLGitHubRepository xmlGitHubRepository : xmlGitHubRepositories) {
 
@@ -33,7 +40,7 @@ class GraphBuilder {
                     + xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "\".");
 
 
-            GitHubRepository gitHubRepository = StoreTool.findOrCreateGitHubRepository(store, xmlGitHubRepository);
+            GitHubRepository gitHubRepository = cacheEndpoint.findOrCreateGitHubRepository(xmlGitHubRepository);
 
             repositoryLevel(store, gitHubRepository, xmlGitHubRepository);
 
@@ -56,7 +63,7 @@ class GraphBuilder {
 
             LOGGER.info("Importing milestone: \"" + jsonMilestone.getTitle() + "\"");
 
-            GitHubMilestone gitHubMilestone = StoreTool.findOrCreateGitHubMilestone(store, jsonMilestone, xmlGitHubRepository);
+            GitHubMilestone gitHubMilestone = cacheEndpoint.findOrCreateGitHubMilestone(jsonMilestone, xmlGitHubRepository);
 
             gitHubRepository.getMilestones().add(gitHubMilestone);
         }
@@ -85,15 +92,15 @@ class GraphBuilder {
                                    XMLGitHubRepository xmlGitHubRepository,
                                    RestTool restTool) throws IOException {
 
-        GitHubIssue gitHubIssue = StoreTool.findOrCreateGitHubIssue(store, jsonIssue, xmlGitHubRepository);
+        GitHubIssue gitHubIssue = cacheEndpoint.findOrCreateGitHubIssue(jsonIssue, xmlGitHubRepository);
 
         // Find existing user or let the store create a new one
-        gitHubIssue.setCreatedBy(StoreTool.findOrCreateGitHubUser(store, jsonIssue.getUser()));
+        gitHubIssue.setCreatedBy(cacheEndpoint.findOrCreateGitHubUser(jsonIssue.getUser()));
 
         // Find existing milestone or let the store create a new one.
         // Issues don't need to have an associated milestone.
         if (jsonIssue.getMilestone() != null) {
-            gitHubIssue.setMilestone(StoreTool.findOrCreateGitHubMilestone(store, jsonIssue.getMilestone(), xmlGitHubRepository));
+            gitHubIssue.setMilestone(cacheEndpoint.findOrCreateGitHubMilestone(jsonIssue.getMilestone(), xmlGitHubRepository));
         }
 
         /*
@@ -116,8 +123,7 @@ class GraphBuilder {
                 gitHubPullRequest.setMergedAt(ZonedDateTime.parse(jsonPullRequest.getMergedAt()));
             }
 
-            GitHubCommit gitHubCommit = StoreTool.findOrCreateGitHubCommit(
-                    store,
+            GitHubCommit gitHubCommit = cacheEndpoint.findOrCreateGitHubCommit(
                     xmlGitHubRepository.getUser(),
                     xmlGitHubRepository.getName(),
                     jsonPullRequest.getMergeCommitSha());
@@ -127,15 +133,15 @@ class GraphBuilder {
 
         for (JSONUser jsonAssignee : jsonIssue.getAssignees()) {
 
-            gitHubIssue.getAssignees().add(StoreTool.findOrCreateGitHubUser(store, jsonAssignee));
+            gitHubIssue.getAssignees().add(cacheEndpoint.findOrCreateGitHubUser(jsonAssignee));
         }
 
         for (JSONLabel jsonLabel : jsonIssue.getLabels()) {
 
-            gitHubIssue.getLabeles().add(StoreTool.findOrCreateGitHubLabel(store, jsonLabel));
+            gitHubIssue.getLabeles().add(cacheEndpoint.findOrCreateGitHubLabel(jsonLabel));
         }
 
-        MarkdownParser.getReferencesInMarkdown(store, gitHubIssue.getBody(), gitHubIssue, xmlGitHubRepository, restTool);
+        markdownParser.getReferencesInMarkdown(gitHubIssue.getBody(), gitHubIssue, xmlGitHubRepository, restTool);
 
         commentLevel(store, gitHubIssue, xmlGitHubRepository, restTool);
 
@@ -159,9 +165,9 @@ class GraphBuilder {
             comment.setCreatedAt(ZonedDateTime.parse(jsonComment.getCreatedAt()));
             comment.setUpdatedAt(ZonedDateTime.parse(jsonComment.getUpdatedAt()));
 
-            comment.setUser(StoreTool.findOrCreateGitHubUser(store, jsonComment.getUser()));
+            comment.setUser(cacheEndpoint.findOrCreateGitHubUser(jsonComment.getUser()));
 
-            MarkdownParser.getReferencesInMarkdown(store, comment.getBody(), comment, xmlGitHubRepository, restTool);
+            markdownParser.getReferencesInMarkdown(comment.getBody(), comment, xmlGitHubRepository, restTool);
 
             // Create a list of comments, each pointing at the next one.
             if (last == null) {

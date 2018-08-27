@@ -6,10 +6,11 @@ import com.buschmais.jqassistant.core.scanner.api.Scope;
 import com.buschmais.jqassistant.plugin.common.api.model.FileDescriptor;
 import com.buschmais.jqassistant.plugin.common.api.scanner.AbstractScannerPlugin;
 import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FileResource;
+import org.jdom2.JDOMException;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLParser;
 import org.jqassistant.contrib.plugin.githubissues.model.GitHub;
-import org.jdom2.JDOMException;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,9 @@ public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource
 
         LOGGER.debug(String.format("GitHub-Issues plugin scans file %s.", path));
 
+        // Create a cache based on the jQAssistant store:
+        CacheEndpoint cacheEndpoint = new CacheEndpoint(getScannerContext().getStore());
+
         List<XMLGitHubRepository> xmlRepositoryList;
         String apiUrl = null;
         try {
@@ -73,13 +77,9 @@ public class GitHubIssueScannerPlugin extends AbstractScannerPlugin<FileResource
                 .getStore()
                 .addDescriptorType(fileDescriptor, GitHub.class);
 
-        GraphBuilder graphBuilder  = new GraphBuilder(
-                scanner.getContext().getStore(),
-                xmlRepositoryList,
-                gitHubIssuesDescriptor,
-                this.apiUrl);
+        GraphBuilder graphBuilder = new GraphBuilder(scanner.getContext().getStore(), this.apiUrl, cacheEndpoint);
 
-        graphBuilder.startTraversal();
+        graphBuilder.startTraversal(gitHubIssuesDescriptor, xmlRepositoryList);
 
         return gitHubIssuesDescriptor;
     }

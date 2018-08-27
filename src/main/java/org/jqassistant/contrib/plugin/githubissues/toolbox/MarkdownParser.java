@@ -1,11 +1,12 @@
 package org.jqassistant.contrib.plugin.githubissues.toolbox;
 
-import com.buschmais.jqassistant.core.store.api.Store;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import lombok.AllArgsConstructor;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.JSONUser;
 import org.jqassistant.contrib.plugin.githubissues.model.GitHubMarkdownPointer;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,11 +17,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class MarkdownParser {
+@AllArgsConstructor
+public class MarkdownParser {
 
     private static final String[] REPLACES = {"https://github.com/", "commit/", "issues/"};
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkdownParser.class);
+
+    private CacheEndpoint cacheEndpoint;
 
     /**
      * This function parses bodies of descriptors that contain markdown information, e.g. issues
@@ -34,14 +38,12 @@ public abstract class MarkdownParser {
      * </ul>
      * IMPORTANT: The depth for resolving references is 1!
      *
-     * @param store                 The jQAssistant store to create new nodes.
      * @param markdown              The markdown that shall be parsed.
      * @param gitHubMarkdownPointer The descriptor containing this markdown.
      * @param xmlGitHubRepository   The repository context from the plugin configuration.
      * @throws IOException If the parsing of an issue request fails.
      */
-    public static void getReferencesInMarkdown(
-            Store store,
+    public void getReferencesInMarkdown(
             String markdown,
             GitHubMarkdownPointer gitHubMarkdownPointer,
             XMLGitHubRepository xmlGitHubRepository,
@@ -64,8 +66,7 @@ public abstract class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(issueElement.attr("data-url"));
 
                 gitHubMarkdownPointer.getGitHubIssues().add(
-                        StoreTool.findOrCreateGitHubIssue(
-                                store,
+                        cacheEndpoint.findOrCreateGitHubIssue(
                                 hrefCut.get(0),
                                 hrefCut.get(1),
                                 hrefCut.get(2),
@@ -78,7 +79,7 @@ public abstract class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(commitElement.attr("href"));
 
                 gitHubMarkdownPointer.getGitHubCommits().add(
-                        StoreTool.findOrCreateGitHubCommit(store,
+                        cacheEndpoint.findOrCreateGitHubCommit(
                                 hrefCut.get(0),
                                 hrefCut.get(1),
                                 hrefCut.get(2)));
@@ -89,7 +90,7 @@ public abstract class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(userElement.attr("href"));
 
                 gitHubMarkdownPointer.getGitHubUsers().add(
-                        StoreTool.findOrCreateGitHubUser(store, new JSONUser(hrefCut.get(0))));
+                        cacheEndpoint.findOrCreateGitHubUser(new JSONUser(hrefCut.get(0))));
             }
 
 

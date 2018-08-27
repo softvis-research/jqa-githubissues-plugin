@@ -1,9 +1,10 @@
-package org.jqassistant.contrib.plugin.githubissues.toolbox;
+package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 import com.buschmais.jqassistant.core.store.api.Store;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,20 +21,28 @@ import java.time.ZonedDateTime;
  * exist, they return the instance. Otherwise they create a new one and save it in the
  * {@link Store} and in the {@link DescriptorCache}.
  */
-public abstract class StoreTool {
+public class CacheEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StoreTool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheEndpoint.class);
+
+    private Store store;
+    private DescriptorCache descriptorCache;
+
+    public CacheEndpoint(Store store) {
+
+        this.store = store;
+        descriptorCache = new DescriptorCache();
+    }
 
     /**
      * Check for {@link GitHubRepository}.
      *
-     * @param store               The jQAssistant store instance to create a new node.
      * @param xmlGitHubRepository The GitHub repository information.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubRepository findOrCreateGitHubRepository(Store store, XMLGitHubRepository xmlGitHubRepository) {
+    public GitHubRepository findOrCreateGitHubRepository(XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubRepository repository = DescriptorCache.getInstance().get(xmlGitHubRepository);
+        GitHubRepository repository = descriptorCache.get(xmlGitHubRepository);
 
         if (repository == null) {
             LOGGER.debug("Creating new repository: " + xmlGitHubRepository);
@@ -43,7 +52,7 @@ public abstract class StoreTool {
             repository.setName(xmlGitHubRepository.getName());
             repository.setUser(xmlGitHubRepository.getUser());
 
-            DescriptorCache.getInstance().put(repository);
+            descriptorCache.put(repository);
         }
 
         return repository;
@@ -55,9 +64,8 @@ public abstract class StoreTool {
      * This method works a little bit different as it only has the ID of the Issue. If it can't find
      * the Issue in the {@link DescriptorCache} it will load the information from the GitHub-API using
      * the {@link RestTool}. After that it falls back to the common case:
-     * {@link #findOrCreateGitHubIssue(Store, JSONIssue, XMLGitHubRepository)}.
+     * {@link #findOrCreateGitHubIssue(JSONIssue, XMLGitHubRepository)}.
      *
-     * @param store               The jQAssistant store instance to create a new node.
      * @param repoUser            The owner of the repository.
      * @param repoName            The name of the repository.
      * @param issueNumber         The number of the issue.
@@ -65,15 +73,14 @@ public abstract class StoreTool {
      * @return The retrieved or newly created descriptor instance.
      * @throws IOException If the parsing of the issue JSON failed.
      */
-    static GitHubIssue findOrCreateGitHubIssue(
-            Store store,
+    public GitHubIssue findOrCreateGitHubIssue(
             String repoUser,
             String repoName,
             String issueNumber,
             XMLGitHubRepository xmlGitHubRepository,
             RestTool restTool) throws IOException {
 
-        GitHubIssue gitHubIssue = DescriptorCache.getInstance().getIssue(repoUser, repoName, issueNumber);
+        GitHubIssue gitHubIssue = descriptorCache.getIssue(repoUser, repoName, issueNumber);
 
         if (gitHubIssue == null) {
             LOGGER.debug("Creating new issue: " + repoUser + "/" + repoName + "#" + issueNumber);
@@ -83,7 +90,7 @@ public abstract class StoreTool {
                     issueNumber);
 
             JSONIssue jsonIssue = JSONParser.getInstance().parseIssue(response);
-            gitHubIssue = findOrCreateGitHubIssue(store, jsonIssue, xmlGitHubRepository);
+            gitHubIssue = findOrCreateGitHubIssue(jsonIssue, xmlGitHubRepository);
         }
 
         return gitHubIssue;
@@ -92,17 +99,15 @@ public abstract class StoreTool {
     /**
      * Check for {@link GitHubIssue}.
      *
-     * @param store               The jQAssistant store instance to create a new node.
      * @param jsonIssue           The GitHub issue information.
      * @param xmlGitHubRepository The GitHub repository information, needed to identify the issue.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubIssue findOrCreateGitHubIssue(
-            Store store,
+    public GitHubIssue findOrCreateGitHubIssue(
             JSONIssue jsonIssue,
             XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubIssue gitHubIssue = DescriptorCache.getInstance().get(jsonIssue, xmlGitHubRepository);
+        GitHubIssue gitHubIssue = descriptorCache.get(jsonIssue, xmlGitHubRepository);
 
         if (gitHubIssue == null) {
             LOGGER.debug("Creating new issue: " + jsonIssue);
@@ -124,7 +129,7 @@ public abstract class StoreTool {
             gitHubIssue.setState(jsonIssue.getState());
             gitHubIssue.setTitle(jsonIssue.getTitle());
 
-            DescriptorCache.getInstance().put(gitHubIssue);
+            descriptorCache.put(gitHubIssue);
         }
 
         return gitHubIssue;
@@ -133,20 +138,19 @@ public abstract class StoreTool {
     /**
      * Check for {@link GitHubUser}.
      *
-     * @param store    The jQAssistant store instance to create a new node.
      * @param jsonUser The GitHub user information.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubUser findOrCreateGitHubUser(Store store, JSONUser jsonUser) {
+    public GitHubUser findOrCreateGitHubUser(JSONUser jsonUser) {
 
-        GitHubUser user = DescriptorCache.getInstance().get(jsonUser);
+        GitHubUser user = descriptorCache.get(jsonUser);
 
         if (user == null) {
             LOGGER.debug("Creating new user: " + jsonUser);
             user = store.create(GitHubUser.class);
             user.setLogin(jsonUser.getLogin());
 
-            DescriptorCache.getInstance().put(user);
+            descriptorCache.put(user);
         }
 
         return user;
@@ -155,13 +159,12 @@ public abstract class StoreTool {
     /**
      * Check for {@link GitHubLabel}.
      *
-     * @param store     The jQAssistant store instance to create a new node.
      * @param jsonLabel The GitHub label information.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubLabel findOrCreateGitHubLabel(Store store, JSONLabel jsonLabel) {
+    public GitHubLabel findOrCreateGitHubLabel(JSONLabel jsonLabel) {
 
-        GitHubLabel label = DescriptorCache.getInstance().get(jsonLabel);
+        GitHubLabel label = descriptorCache.get(jsonLabel);
 
         if (label == null) {
             LOGGER.debug("Creating new label: " + jsonLabel);
@@ -169,7 +172,7 @@ public abstract class StoreTool {
             label.setName(jsonLabel.getName());
             label.setDescription(jsonLabel.getDescription());
 
-            DescriptorCache.getInstance().put(label);
+            descriptorCache.put(label);
         }
 
         return label;
@@ -178,14 +181,13 @@ public abstract class StoreTool {
     /**
      * Check for {@link GitHubMilestone}.
      *
-     * @param store               The jQAssistant store instance to create a new node.
      * @param jsonMilestone       The GitHub milestone information.
      * @param xmlGitHubRepository The GitHub repository information, needed to identify the milestone.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubMilestone findOrCreateGitHubMilestone(Store store, JSONMilestone jsonMilestone, XMLGitHubRepository xmlGitHubRepository) {
+    public GitHubMilestone findOrCreateGitHubMilestone(JSONMilestone jsonMilestone, XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubMilestone milestone = DescriptorCache.getInstance().get(jsonMilestone, xmlGitHubRepository);
+        GitHubMilestone milestone = descriptorCache.get(jsonMilestone, xmlGitHubRepository);
 
         if (milestone == null) {
             LOGGER.debug("Creating new milestone: " + jsonMilestone);
@@ -204,9 +206,9 @@ public abstract class StoreTool {
             milestone.setState(jsonMilestone.getState());
             milestone.setNumber(jsonMilestone.getNumber());
 
-            milestone.setCreatedBy(findOrCreateGitHubUser(store, jsonMilestone.getCreator()));
+            milestone.setCreatedBy(findOrCreateGitHubUser(jsonMilestone.getCreator()));
 
-            DescriptorCache.getInstance().put(milestone);
+            descriptorCache.put(milestone);
         }
 
         return milestone;
@@ -215,15 +217,14 @@ public abstract class StoreTool {
     /**
      * Check for {@link GitHubCommit}.
      *
-     * @param store     The jQAssistant store instance to create a new node.
      * @param repoUser  The owner of the repository.
      * @param repoName  The name of the repository.
      * @param commitSha The hash of the commit.
      * @return The retrieved or newly created descriptor instance.
      */
-    public static GitHubCommit findOrCreateGitHubCommit(Store store, String repoUser, String repoName, String commitSha) {
+    public GitHubCommit findOrCreateGitHubCommit(String repoUser, String repoName, String commitSha) {
 
-        GitHubCommit commit = DescriptorCache.getInstance().getCommit(repoUser, repoName, commitSha);
+        GitHubCommit commit = descriptorCache.getCommit(repoUser, repoName, commitSha);
 
         if (commit == null) {
 
@@ -232,7 +233,7 @@ public abstract class StoreTool {
             commit.setId(repoUser + "/" + repoName + "#" + commitSha);
             commit.setSha(commitSha);
 
-            DescriptorCache.getInstance().put(commit);
+            descriptorCache.put(commit);
         }
 
         return commit;

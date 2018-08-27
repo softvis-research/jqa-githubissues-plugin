@@ -42,7 +42,7 @@ public class RestTool {
      * @return The response as JSON-String.
      * @see <a href="https://developer.github.com/v3/issues/#get-a-single-issue">REST-API</a>
      */
-    String requestIssueByRepositoryAndNumber(String repoUser,
+    public String requestIssueByRepositoryAndNumber(String repoUser,
                                              String repoName,
                                              String issueNumber) {
 

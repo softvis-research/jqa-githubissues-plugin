@@ -1,4 +1,4 @@
-package org.jqassistant.contrib.plugin.githubissues.toolbox;
+package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
@@ -12,8 +12,6 @@ import java.util.HashMap;
 
 class DescriptorCache {
 
-    private static DescriptorCache instance;
-
     private HashMap<String, GitHubRepository> repositories;
     private HashMap<String, GitHubCommit> commits;
     private HashMap<String, GitHubIssue> issues;
@@ -21,7 +19,7 @@ class DescriptorCache {
     private HashMap<String, GitHubLabel> labels;
     private HashMap<String, GitHubMilestone> milestones;
 
-    private DescriptorCache() {
+    DescriptorCache() {
 
         repositories = new HashMap<>();
         commits = new HashMap<>();
@@ -29,15 +27,6 @@ class DescriptorCache {
         users = new HashMap<>();
         labels = new HashMap<>();
         milestones = new HashMap<>();
-    }
-
-    static DescriptorCache getInstance() {
-
-        if (instance == null) {
-            instance = new DescriptorCache();
-        }
-
-        return instance;
     }
 
     GitHubMilestone get(JSONMilestone milestone, XMLGitHubRepository xmlGitHubRepository) {

@@ -3,7 +3,7 @@ package org.jqassistant.contrib.plugin.githubissues.abstract_classes;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLParser;
 import org.junit.Test;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.MarkdownParser;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.StoreTool;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 
 /**
  * Covers the following problem:
@@ -19,7 +19,5 @@ public class AbstractClassesTest {
     public void coverAbstractClasses() {
 
         new XMLParser() {};
-        new MarkdownParser() {};
-        new StoreTool() {};
     }
 }
