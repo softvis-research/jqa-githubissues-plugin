@@ -9,6 +9,7 @@ import org.jqassistant.contrib.plugin.githubissues.json.JSONUser;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 class DescriptorCache {
 
@@ -72,9 +73,9 @@ class DescriptorCache {
 
         String id = repoUser + "/" + repoName + "#" + commitSha;
 
-        for (String key : commits.keySet()) {
-            if (key.startsWith(id) || id.startsWith(key)) {
-                return commits.get(key);
+        for (Map.Entry<String, GitHubCommit> entry : commits.entrySet()) {
+            if (entry.getKey().startsWith(id) || id.startsWith(entry.getKey())) {
+                return entry.getValue();
             }
         }
         return null;
