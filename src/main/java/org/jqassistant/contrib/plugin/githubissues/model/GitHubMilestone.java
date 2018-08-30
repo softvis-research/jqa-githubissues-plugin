@@ -7,7 +7,7 @@ import com.buschmais.xo.neo4j.api.annotation.Relation;
 import java.time.ZonedDateTime;
 
 @Label("Milestone")
-public interface GitHubMilestone extends GitHub {
+public interface GitHubMilestone extends GitHub, GitHubTimestamps {
 
     @Property("milestoneId")
     String getMilestoneId();
@@ -28,14 +28,6 @@ public interface GitHubMilestone extends GitHub {
     @Property("number")
     int getNumber();
     void setNumber(int number);
-
-    @Property("createdAt")
-    ZonedDateTime getCreatedAt();
-    void setCreatedAt(ZonedDateTime createdAt);
-
-    @Property("updatedAt")
-    ZonedDateTime getUpdatedAt();
-    void setUpdatedAt(ZonedDateTime updatedAt);
 
     @Property("dueOn")
     ZonedDateTime getDueOn();

@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Label("Issue")
-public interface GitHubIssue extends GitHub, GitHubMarkdownPointer {
+public interface GitHubIssue extends GitHub, GitHubMarkdownPointer, GitHubTimestamps {
 
     @Property("issueId")
     String getIssueId();
@@ -33,14 +33,6 @@ public interface GitHubIssue extends GitHub, GitHubMarkdownPointer {
     @Property("comments")
     int getComments();
     void setComments(int comments);
-
-    @Property("createdAt")
-    ZonedDateTime getCreatedAt();
-    void setCreatedAt(ZonedDateTime createdAt);
-
-    @Property("updatedAt")
-    ZonedDateTime getUpdatedAt();
-    void setUpdatedAt(ZonedDateTime updatedAt);
 
     @Property("locked")
     boolean isLocked();
