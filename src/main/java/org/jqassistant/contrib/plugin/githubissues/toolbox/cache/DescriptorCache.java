@@ -1,6 +1,8 @@
 package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 
+import org.jqassistant.contrib.plugin.githubissues.ids.CommitId;
+import org.jqassistant.contrib.plugin.githubissues.ids.RepositoryId;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
@@ -15,8 +17,8 @@ import java.util.Map;
  */
 class DescriptorCache {
 
-    private HashMap<String, GitHubRepository> repositories;
-    private HashMap<String, GitHubCommit> commits;
+    private HashMap<RepositoryId, GitHubRepository> repositories;
+    private HashMap<CommitId, GitHubCommit> commits;
     private HashMap<String, GitHubIssue> issues;
     private HashMap<String, GitHubComment> comments;
     private HashMap<String, GitHubUser> users;
@@ -53,7 +55,7 @@ class DescriptorCache {
 
     GitHubRepository get(XMLGitHubRepository xmlGitHubRepository) {
 
-        return repositories.get(xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName());
+        return repositories.get(new RepositoryId(xmlGitHubRepository));
     }
 
     /**
@@ -75,14 +77,7 @@ class DescriptorCache {
      */
     GitHubCommit getCommit(String repoUser, String repoName, String commitSha) {
 
-        String id = repoUser + "/" + repoName + "#" + commitSha;
-
-        for (Map.Entry<String, GitHubCommit> entry : commits.entrySet()) {
-            if (entry.getKey().startsWith(id) || id.startsWith(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        return null;
+        return commits.get(new CommitId(repoUser, repoName, commitSha));
     }
 
     GitHubIssue get(JSONIssue issue, XMLGitHubRepository xmlGitHubRepository) {
@@ -125,8 +120,10 @@ class DescriptorCache {
 
     void put(GitHubRepository repository) {
 
-        if (!repositories.containsKey(repository.getRepositoryId())) {
-            repositories.put(repository.getRepositoryId(), repository);
+        RepositoryId key = new RepositoryId(repository);
+
+        if (!repositories.containsKey(key)) {
+            repositories.put(key, repository);
         }
     }
 
