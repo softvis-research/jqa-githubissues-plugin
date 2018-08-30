@@ -13,6 +13,13 @@ import org.jqassistant.contrib.plugin.githubissues.model.GitHubRepository;
 
 import javax.ws.rs.core.MediaType;
 
+/**
+ * This class provides methods to retrieve information from the REST API of GitHub.
+ * <p>
+ * Every method is well documented and contains a link to the REST API documentation.
+ * <p>
+ * For every configured repository one instance of this class will be created.
+ */
 public class RestTool {
 
     private String apiUrl;
@@ -26,8 +33,8 @@ public class RestTool {
 
         client.removeAllFilters();
         client.addFilter(new HTTPBasicAuthFilter(
-                xmlGitHubRepository.getCredentials().getUser(),
-                xmlGitHubRepository.getCredentials().getPassword()));
+            xmlGitHubRepository.getCredentials().getUser(),
+            xmlGitHubRepository.getCredentials().getPassword()));
 
         this.xmlGitHubRepository = xmlGitHubRepository;
     }
@@ -43,12 +50,12 @@ public class RestTool {
      * @see <a href="https://developer.github.com/v3/issues/#get-a-single-issue">REST-API</a>
      */
     public String requestIssueByRepositoryAndNumber(String repoUser,
-                                             String repoName,
-                                             String issueNumber) {
+                                                    String repoName,
+                                                    String issueNumber) {
 
         WebResource issueWebResource = client.resource(
-                apiUrl + "repos/" + repoUser + "/" +
-                        repoName + "/issues/" + issueNumber);
+            apiUrl + "repos/" + repoUser + "/" +
+                repoName + "/issues/" + issueNumber);
 
         return issueWebResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class);
 
@@ -64,8 +71,8 @@ public class RestTool {
     public String requestIssuesByRepository(GitHubRepository gitHubRepository) {
 
         WebResource issuesWebResource = client.resource(
-                apiUrl + "repos/" + gitHubRepository.getUser() + "/" +
-                        gitHubRepository.getName() + "/issues?state=all");
+            apiUrl + "repos/" + gitHubRepository.getUser() + "/" +
+                gitHubRepository.getName() + "/issues?state=all");
 
         return issuesWebResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class);
     }
@@ -80,8 +87,8 @@ public class RestTool {
     public String requestCommentsByIssue(GitHubIssue gitHubIssueDescriptor) {
 
         WebResource commentsWebResource = client.resource(
-                apiUrl + "repos/" + xmlGitHubRepository.getUser() + "/" +
-                        xmlGitHubRepository.getName() + "/issues/" + gitHubIssueDescriptor.getNumber() + "/comments");
+            apiUrl + "repos/" + xmlGitHubRepository.getUser() + "/" +
+                xmlGitHubRepository.getName() + "/issues/" + gitHubIssueDescriptor.getNumber() + "/comments");
 
         return commentsWebResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class);
     }
@@ -97,8 +104,8 @@ public class RestTool {
     public String requestMilestonesByRepository(GitHubRepository gitHubRepository) {
 
         WebResource milestonesWebResource = client.resource(
-                apiUrl + "repos/" + gitHubRepository.getUser() + "/" +
-                        gitHubRepository.getName() + "/milestones?state=all");
+            apiUrl + "repos/" + gitHubRepository.getUser() + "/" +
+                gitHubRepository.getName() + "/milestones?state=all");
 
         return milestonesWebResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class);
     }

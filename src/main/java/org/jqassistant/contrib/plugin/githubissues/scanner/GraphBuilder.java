@@ -1,6 +1,8 @@
 package org.jqassistant.contrib.plugin.githubissues.scanner;
 
-import com.buschmais.jqassistant.core.store.api.Store;
+import com.buschmais.jqassistant.core.scanner.api.Scanner;
+import com.buschmais.jqassistant.core.scanner.api.Scope;
+import com.buschmais.jqassistant.plugin.common.api.scanner.filesystem.FileResource;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
@@ -14,43 +16,65 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+/**
+ * The GraphBuilder gets build only once per execution of the GitHub-Issues plugin
+ * {@link GitHubIssueScannerPlugin#scan(FileResource, String, Scope, Scanner)} method.
+ * <p>
+ * It takes a list of specified repositories and starts to analyze them by following url paths.
+ * <p>
+ * The different tree depths are represented by the corresponding methods.
+ */
 class GraphBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphBuilder.class);
 
-    private Store store;
     private String apiUrl;
     private CacheEndpoint cacheEndpoint;
     private MarkdownParser markdownParser;
 
-    GraphBuilder(Store store, String apiUrl, CacheEndpoint cacheEndpoint) {
+    GraphBuilder(String apiUrl, CacheEndpoint cacheEndpoint) {
 
-        this.store = store;
         this.apiUrl = apiUrl;
         this.cacheEndpoint = cacheEndpoint;
 
         markdownParser = new MarkdownParser(cacheEndpoint);
     }
 
+    /**
+     * The entry point and the only method accessible from outside.
+     * <p>
+     * It takes a list of repository specifications and the root descriptor build by the
+     * {@link GitHubIssueScannerPlugin}.
+     *
+     * @param gitHubIssuesConfigurationFile The root descriptor which is also the root of the tree.
+     * @param xmlGitHubRepositories         The list of repositories specified in the configuration file.
+     * @throws IOException If parsing fails.
+     */
     void startTraversal(GitHubIssuesConfigurationFile gitHubIssuesConfigurationFile,
                         List<XMLGitHubRepository> xmlGitHubRepositories) throws IOException {
 
         for (XMLGitHubRepository xmlGitHubRepository : xmlGitHubRepositories) {
 
             LOGGER.info("GitHub-Issues plugin searches in repository \""
-                    + xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "\".");
+                + xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "\".");
 
 
             GitHubRepository gitHubRepository = cacheEndpoint.findOrCreateGitHubRepository(xmlGitHubRepository);
 
-            repositoryLevel(store, gitHubRepository, xmlGitHubRepository);
+            repositoryLevel(gitHubRepository, xmlGitHubRepository);
 
             gitHubIssuesConfigurationFile.getRepositories().add(gitHubRepository);
         }
     }
 
-    private void repositoryLevel(Store store,
-                                 GitHubRepository gitHubRepository,
+    /**
+     * The method gets invoked once for every repository in a configuration file.
+     *
+     * @param gitHubRepository    The descriptor for the current repository.
+     * @param xmlGitHubRepository The xml configuration for the current repository.
+     * @throws IOException If parsing fails.
+     */
+    private void repositoryLevel(GitHubRepository gitHubRepository,
                                  XMLGitHubRepository xmlGitHubRepository) throws IOException {
 
         RestTool restTool = new RestTool(apiUrl, xmlGitHubRepository);
@@ -77,19 +101,27 @@ class GraphBuilder {
 
         for (JSONIssue jsonIssue : jsonIssues) {
             String id = xmlGitHubRepository.getUser() +
-                    "/" + xmlGitHubRepository.getName() +
-                    "#" + jsonIssue.getNumber();
+                "/" + xmlGitHubRepository.getName() +
+                "#" + jsonIssue.getNumber();
 
             LOGGER.info("Importing issue: " + id + ", \"" + jsonIssue.getTitle() + "\"");
 
-            GitHubIssue gitHubIssue = issueLevel(store, jsonIssue, xmlGitHubRepository, restTool);
+            GitHubIssue gitHubIssue = issueLevel(jsonIssue, xmlGitHubRepository, restTool);
 
             gitHubRepository.getContains().add(gitHubIssue);
         }
     }
 
-    private GitHubIssue issueLevel(Store store,
-                                   JSONIssue jsonIssue,
+
+    /**
+     * This method gets invoked once for every issue in a repository.
+     *
+     * @param jsonIssue           The issue as JSON POJO.
+     * @param xmlGitHubRepository The xml configuration for the current repository.
+     * @param restTool            The RestTool which will be used to request further details.
+     * @throws IOException If parsing fails.
+     */
+    private GitHubIssue issueLevel(JSONIssue jsonIssue,
                                    XMLGitHubRepository xmlGitHubRepository,
                                    RestTool restTool) throws IOException {
 
@@ -114,7 +146,7 @@ class GraphBuilder {
         if (jsonIssue.getPullRequest() != null) {
 
             String response = restTool.requestPullRequestByAbsoluteUrl(
-                    jsonIssue.getPullRequest().getUrl());
+                jsonIssue.getPullRequest().getUrl());
 
             JSONIssue jsonPullRequest = JSONParser.getInstance().parsePullRequest(response);
 
@@ -125,9 +157,9 @@ class GraphBuilder {
             }
 
             GitHubCommit gitHubCommit = cacheEndpoint.findOrCreateGitHubCommit(
-                    xmlGitHubRepository.getUser(),
-                    xmlGitHubRepository.getName(),
-                    jsonPullRequest.getMergeCommitSha());
+                xmlGitHubRepository.getUser(),
+                xmlGitHubRepository.getName(),
+                jsonPullRequest.getMergeCommitSha());
 
             gitHubPullRequest.setLastCommit(gitHubCommit);
         }
@@ -144,13 +176,20 @@ class GraphBuilder {
 
         markdownParser.getReferencesInMarkdown(gitHubIssue.getBody(), gitHubIssue, xmlGitHubRepository, restTool);
 
-        commentLevel(store, gitHubIssue, xmlGitHubRepository, restTool);
+        commentLevel(gitHubIssue, xmlGitHubRepository, restTool);
 
         return gitHubIssue;
     }
 
-    private void commentLevel(Store store,
-                              GitHubIssue gitHubIssue,
+    /**
+     * Every issue can contain one or more comments.
+     *
+     * @param gitHubIssue         The issue as descriptor.
+     * @param xmlGitHubRepository The xml configuration for the current repository.
+     * @param restTool            The RestTool which will be used to request further details.
+     * @throws IOException If parsing fails.
+     */
+    private void commentLevel(GitHubIssue gitHubIssue,
                               XMLGitHubRepository xmlGitHubRepository,
                               RestTool restTool) throws IOException {
 
@@ -161,12 +200,7 @@ class GraphBuilder {
         GitHubComment last = null;
         for (JSONComment jsonComment : jsonComments) {
 
-            GitHubComment comment = store.create(GitHubComment.class);
-            comment.setBody(jsonComment.getBody());
-            comment.setCreatedAt(ZonedDateTime.parse(jsonComment.getCreatedAt()));
-            comment.setUpdatedAt(ZonedDateTime.parse(jsonComment.getUpdatedAt()));
-
-            comment.setUser(cacheEndpoint.findOrCreateGitHubUser(jsonComment.getUser()));
+            GitHubComment comment = cacheEndpoint.findOrCreateGitHubComment(jsonComment, xmlGitHubRepository);
 
             markdownParser.getReferencesInMarkdown(comment.getBody(), comment, xmlGitHubRepository, restTool);
 

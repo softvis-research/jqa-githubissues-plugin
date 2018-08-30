@@ -74,20 +74,20 @@ public class CacheEndpoint {
      * @throws IOException If the parsing of the issue JSON failed.
      */
     public GitHubIssue findOrCreateGitHubIssue(
-            String repoUser,
-            String repoName,
-            String issueNumber,
-            XMLGitHubRepository xmlGitHubRepository,
-            RestTool restTool) throws IOException {
+        String repoUser,
+        String repoName,
+        String issueNumber,
+        XMLGitHubRepository xmlGitHubRepository,
+        RestTool restTool) throws IOException {
 
         GitHubIssue gitHubIssue = descriptorCache.getIssue(repoUser, repoName, issueNumber);
 
         if (gitHubIssue == null) {
             LOGGER.debug("Creating new issue: " + repoUser + "/" + repoName + "#" + issueNumber);
             String response = restTool.requestIssueByRepositoryAndNumber(
-                    repoUser,
-                    repoName,
-                    issueNumber);
+                repoUser,
+                repoName,
+                issueNumber);
 
             JSONIssue jsonIssue = JSONParser.getInstance().parseIssue(response);
             gitHubIssue = findOrCreateGitHubIssue(jsonIssue, xmlGitHubRepository);
@@ -104,8 +104,8 @@ public class CacheEndpoint {
      * @return The retrieved or newly created descriptor instance.
      */
     public GitHubIssue findOrCreateGitHubIssue(
-            JSONIssue jsonIssue,
-            XMLGitHubRepository xmlGitHubRepository) {
+        JSONIssue jsonIssue,
+        XMLGitHubRepository xmlGitHubRepository) {
 
         GitHubIssue gitHubIssue = descriptorCache.get(jsonIssue, xmlGitHubRepository);
 
@@ -237,5 +237,33 @@ public class CacheEndpoint {
         }
 
         return commit;
+    }
+
+
+    /**
+     * Check for {@link GitHubComment}.
+     *
+     * @param jsonComment         The GitHub comment information.
+     * @param xmlGitHubRepository The GitHub repository information, needed to identify the milestone.
+     * @return The retrieved or newly created descriptor instance.
+     */
+    public GitHubComment findOrCreateGitHubComment(JSONComment jsonComment, XMLGitHubRepository xmlGitHubRepository) {
+
+        GitHubComment comment = descriptorCache.get(jsonComment, xmlGitHubRepository);
+
+        if (comment == null) {
+            LOGGER.debug("Creating new comment: " + jsonComment);
+
+            comment = store.create(GitHubComment.class);
+            comment.setBody(jsonComment.getBody());
+            comment.setCreatedAt(ZonedDateTime.parse(jsonComment.getCreatedAt()));
+            comment.setUpdatedAt(ZonedDateTime.parse(jsonComment.getUpdatedAt()));
+
+            comment.setUser(findOrCreateGitHubUser(jsonComment.getUser()));
+
+            descriptorCache.put(comment);
+        }
+
+        return comment;
     }
 }

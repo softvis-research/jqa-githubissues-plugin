@@ -10,6 +10,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The {@link XMLParser} class contains two functions which parse the configuration file for the GitHub-Issues plugin.
+ * Therefore, JDOM is used as the XML library of choice.
+ *
+ * @see <a href="http://www.jdom.org">JDOM</a>
+ */
 public abstract class XMLParser {
 
     /**
@@ -28,12 +34,12 @@ public abstract class XMLParser {
         Document document = builder.build(inputStream);
         for (Element repository : document.getRootElement().getChildren("github-repository")) {
             repositoryList.add(new XMLGitHubRepository(
-                    repository.getChildText("user"),
-                    repository.getChildText("name"),
-                    new XMLCredentials(
-                            repository.getChild("credentials").getChildText("user"),
-                            repository.getChild("credentials").getChildText("password")
-                    )));
+                repository.getChildText("user"),
+                repository.getChildText("name"),
+                new XMLCredentials(
+                    repository.getChild("credentials").getChildText("user"),
+                    repository.getChild("credentials").getChildText("password")
+                )));
         }
 
         return repositoryList;
@@ -41,7 +47,8 @@ public abstract class XMLParser {
 
 
     /**
-     * Parses the API URL which shall be used.
+     * Parses the API URL which shall be used by the
+     * {@link org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool}.
      *
      * @param inputStream The InputStream that shall be used.
      * @return The API URL as String or null if it is not set.
@@ -53,7 +60,7 @@ public abstract class XMLParser {
         SAXBuilder builder = new SAXBuilder();
         Document document = builder.build(inputStream);
 
-        if(document.getRootElement().getChild("github-api") != null) {
+        if (document.getRootElement().getChild("github-api") != null) {
             return document.getRootElement().getChild("github-api").getText();
         }
 

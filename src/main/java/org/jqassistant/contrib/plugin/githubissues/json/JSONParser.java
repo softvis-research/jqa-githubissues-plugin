@@ -8,6 +8,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * The {@link JSONParser} class contains methods for every json response from the GitHub API that is
+ * used in the GitHub-Issues plugin.
+ *
+ * Furthermore, there is one function {@link #parseMarkdownRequest(JSONMarkdownRequest)} which does reverse parsing.
+ * It is needed to post markdown requests to resolve references in the issue and comment bodies.
+ */
 public class JSONParser {
 
     private static JSONParser instance;

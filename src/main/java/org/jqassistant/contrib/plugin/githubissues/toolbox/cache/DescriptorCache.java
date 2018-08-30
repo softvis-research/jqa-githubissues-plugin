@@ -2,20 +2,23 @@ package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
-import org.jqassistant.contrib.plugin.githubissues.json.JSONIssue;
-import org.jqassistant.contrib.plugin.githubissues.json.JSONLabel;
-import org.jqassistant.contrib.plugin.githubissues.json.JSONMilestone;
-import org.jqassistant.contrib.plugin.githubissues.json.JSONUser;
+import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class caches descriptor instances which have already been created.
+ * <p>
+ * For more information see {@link CacheEndpoint} which is the public accessible interface for this cache.
+ */
 class DescriptorCache {
 
     private HashMap<String, GitHubRepository> repositories;
     private HashMap<String, GitHubCommit> commits;
     private HashMap<String, GitHubIssue> issues;
+    private HashMap<String, GitHubComment> comments;
     private HashMap<String, GitHubUser> users;
     private HashMap<String, GitHubLabel> labels;
     private HashMap<String, GitHubMilestone> milestones;
@@ -28,13 +31,14 @@ class DescriptorCache {
         users = new HashMap<>();
         labels = new HashMap<>();
         milestones = new HashMap<>();
+        comments = new HashMap<>();
     }
 
     GitHubMilestone get(JSONMilestone milestone, XMLGitHubRepository xmlGitHubRepository) {
 
         return milestones.get(xmlGitHubRepository.getUser() +
-                "/" + xmlGitHubRepository.getName() +
-                "#" + milestone.getNumber());
+            "/" + xmlGitHubRepository.getName() +
+            "#" + milestone.getNumber());
     }
 
     GitHubUser get(JSONUser user) {
@@ -86,6 +90,13 @@ class DescriptorCache {
         return issues.get(xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "#" + issue.getNumber());
     }
 
+    GitHubComment get(JSONComment comment, XMLGitHubRepository xmlGitHubRepository) {
+
+        return comments.get(xmlGitHubRepository.getUser() +
+            "/" + xmlGitHubRepository.getName() +
+            "/comment#" + comment.getId());
+    }
+
     GitHubIssue getIssue(String repoUser, String repoName, String issueNumber) {
 
         return issues.get(repoUser + "/" + repoName + "#" + issueNumber);
@@ -130,6 +141,13 @@ class DescriptorCache {
 
         if (!issues.containsKey(issue.getIssueId())) {
             issues.put(issue.getIssueId(), issue);
+        }
+    }
+
+    void put(GitHubComment comment) {
+
+        if (!comments.containsKey(comment.getCommentId())) {
+            comments.put(comment.getCommentId(), comment);
         }
     }
 }

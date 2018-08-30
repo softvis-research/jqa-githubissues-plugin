@@ -17,6 +17,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The {@link MarkdownParser} is an additional feature which resolves references in the text body of issues and
+ * comments.
+ * <p>
+ * For more information have a look at the documentation of
+ * {@link #getReferencesInMarkdown(String, GitHubMarkdownPointer, XMLGitHubRepository, RestTool)}.
+ */
 @AllArgsConstructor
 public class MarkdownParser {
 
@@ -44,10 +51,10 @@ public class MarkdownParser {
      * @throws IOException If the parsing of an issue request fails.
      */
     public void getReferencesInMarkdown(
-            String markdown,
-            GitHubMarkdownPointer gitHubMarkdownPointer,
-            XMLGitHubRepository xmlGitHubRepository,
-            RestTool restTool) throws IOException {
+        String markdown,
+        GitHubMarkdownPointer gitHubMarkdownPointer,
+        XMLGitHubRepository xmlGitHubRepository,
+        RestTool restTool) throws IOException {
 
         try {
             // https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-abuse-rate-limits
@@ -66,12 +73,12 @@ public class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(issueElement.attr("data-url"));
 
                 gitHubMarkdownPointer.getGitHubIssues().add(
-                        cacheEndpoint.findOrCreateGitHubIssue(
-                                hrefCut.get(0),
-                                hrefCut.get(1),
-                                hrefCut.get(2),
-                                xmlGitHubRepository,
-                                restTool));
+                    cacheEndpoint.findOrCreateGitHubIssue(
+                        hrefCut.get(0),
+                        hrefCut.get(1),
+                        hrefCut.get(2),
+                        xmlGitHubRepository,
+                        restTool));
             }
 
             for (Element commitElement : htmlDocument.select("a.commit-link")) {
@@ -79,10 +86,10 @@ public class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(commitElement.attr("href"));
 
                 gitHubMarkdownPointer.getGitHubCommits().add(
-                        cacheEndpoint.findOrCreateGitHubCommit(
-                                hrefCut.get(0),
-                                hrefCut.get(1),
-                                hrefCut.get(2)));
+                    cacheEndpoint.findOrCreateGitHubCommit(
+                        hrefCut.get(0),
+                        hrefCut.get(1),
+                        hrefCut.get(2)));
             }
 
             for (Element userElement : htmlDocument.select("a.user-mention")) {
@@ -90,7 +97,7 @@ public class MarkdownParser {
                 List<String> hrefCut = removeDispensableHrefPartsAndCutIt(userElement.attr("href"));
 
                 gitHubMarkdownPointer.getGitHubUsers().add(
-                        cacheEndpoint.findOrCreateGitHubUser(new JSONUser(hrefCut.get(0))));
+                    cacheEndpoint.findOrCreateGitHubUser(new JSONUser(hrefCut.get(0))));
             }
 
 
@@ -106,6 +113,14 @@ public class MarkdownParser {
         }
     }
 
+    /**
+     * The HTML-anchors returned by the GitHub API contain URLs which can be used to extract IDs.
+     * To make the extraction more clear dispensable parts will be removed and the URL will be cut
+     * in sub parts.
+     *
+     * @param href The URL which shall be cleaned and cut.
+     * @return A list of importing sub parts.
+     */
     private static List<String> removeDispensableHrefPartsAndCutIt(String href) {
 
         List<String> result = new ArrayList<>();
