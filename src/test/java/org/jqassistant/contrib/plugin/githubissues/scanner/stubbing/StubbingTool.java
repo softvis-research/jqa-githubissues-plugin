@@ -20,11 +20,13 @@ public abstract class StubbingTool {
     }
 
     private static void stubMilestones() throws IOException {
-        stub("/repos/github-user/github-repository/milestones?state=all", "rest-mocks/milestones.json");
+        stub("/repos/github-user/github-repository/milestones?state=all&per_page=100",
+            "rest-mocks/milestones.json");
     }
 
     private static void stubIssues() throws IOException {
-        stub("/repos/github-user/github-repository/issues?state=all", "rest-mocks/issues.json");
+        stub("/repos/github-user/github-repository/issues?state=all&per_page=100",
+            "rest-mocks/issues.json");
     }
 
     private static void stubPullRequest() throws IOException {
@@ -32,7 +34,8 @@ public abstract class StubbingTool {
     }
 
     private static void stubComments() throws IOException {
-        stub("/repos/github-user/github-repository/issues/1347/comments", "rest-mocks/comments.json");
+        stub("/repos/github-user/github-repository/issues/1347/comments?per_page=100",
+            "rest-mocks/comments.json");
     }
 
     private static void stubMarkdown() throws IOException {
@@ -42,7 +45,8 @@ public abstract class StubbingTool {
         stubFor(post("/markdown")
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withHeader("Content-Type", "application/org.jqassistant.contrib.plugin.githubissues.json")
+                        .withHeader("Content-Type",
+                            "application/org.jqassistant.contrib.plugin.githubissues.json")
                         .withBody(IOUtils.toString(in))));
     }
 

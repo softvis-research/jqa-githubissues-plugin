@@ -80,9 +80,7 @@ class GraphBuilder {
         RestTool restTool = new RestTool(apiUrl, xmlGitHubRepository);
 
         // Load and iterate over milestones
-        String response = restTool.requestMilestonesByRepository(gitHubRepository);
-
-        List<JSONMilestone> jsonMilestones = JSONParser.getInstance().parseMilestones(response);
+        List<JSONMilestone> jsonMilestones = restTool.requestMilestonesByRepository(gitHubRepository);
 
         for (JSONMilestone jsonMilestone : jsonMilestones) {
 
@@ -94,10 +92,7 @@ class GraphBuilder {
         }
 
         // Load and iterate over issues
-        response = restTool.requestIssuesByRepository(gitHubRepository);
-
-        List<JSONIssue> jsonIssues = JSONParser.getInstance().parseIssues(response);
-
+        List<JSONIssue> jsonIssues = restTool.requestIssuesByRepository(gitHubRepository);
 
         for (JSONIssue jsonIssue : jsonIssues) {
             String id = xmlGitHubRepository.getUser() +
@@ -145,10 +140,8 @@ class GraphBuilder {
         */
         if (jsonIssue.getPullRequest() != null) {
 
-            String response = restTool.requestPullRequestByAbsoluteUrl(
+            JSONIssue jsonPullRequest = restTool.requestPullRequestByAbsoluteUrl(
                 jsonIssue.getPullRequest().getUrl());
-
-            JSONIssue jsonPullRequest = JSONParser.getInstance().parsePullRequest(response);
 
             GitHubPullRequest gitHubPullRequest = (GitHubPullRequest) gitHubIssue;
 
@@ -193,9 +186,7 @@ class GraphBuilder {
                               XMLGitHubRepository xmlGitHubRepository,
                               RestTool restTool) throws IOException {
 
-        String response = restTool.requestCommentsByIssue(gitHubIssue);
-
-        List<JSONComment> jsonComments = JSONParser.getInstance().parseComments(response);
+        List<JSONComment> jsonComments = restTool.requestCommentsByIssue(gitHubIssue);
 
         GitHubComment last = null;
         for (JSONComment jsonComment : jsonComments) {

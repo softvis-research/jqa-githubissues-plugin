@@ -84,12 +84,11 @@ public class CacheEndpoint {
 
         if (gitHubIssue == null) {
             LOGGER.debug("Creating new issue: " + repoUser + "/" + repoName + "#" + issueNumber);
-            String response = restTool.requestIssueByRepositoryAndNumber(
+            JSONIssue jsonIssue = restTool.requestIssueByRepositoryAndNumber(
                 repoUser,
                 repoName,
                 issueNumber);
 
-            JSONIssue jsonIssue = JSONParser.getInstance().parseIssue(response);
             gitHubIssue = findOrCreateGitHubIssue(jsonIssue, xmlGitHubRepository);
         }
 
