@@ -43,11 +43,12 @@ public class CacheEndpoint {
      */
     public GitHubRepository findOrCreateGitHubRepository(XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubRepository repository = descriptorCache.get(
-            RepositoryID.builder()
-                .user(xmlGitHubRepository.getUser())
-                .name(xmlGitHubRepository.getName())
-                .build());
+        RepositoryID repositoryID = RepositoryID.builder()
+            .user(xmlGitHubRepository.getUser())
+            .name(xmlGitHubRepository.getName())
+            .build();
+
+        GitHubRepository repository = descriptorCache.get(repositoryID);
 
         if (repository == null) {
             LOGGER.debug("Creating new repository: " + xmlGitHubRepository);
@@ -57,7 +58,7 @@ public class CacheEndpoint {
             repository.setName(xmlGitHubRepository.getName());
             repository.setUser(xmlGitHubRepository.getUser());
 
-            descriptorCache.put(repository);
+            descriptorCache.put(repository, repositoryID);
         }
 
         return repository;
@@ -112,16 +113,15 @@ public class CacheEndpoint {
      * @param xmlGitHubRepository The GitHub repository information, needed to identify the issue.
      * @return The retrieved or newly created descriptor instance.
      */
-    public GitHubIssue findOrCreateGitHubIssue(
-        JSONIssue jsonIssue,
-        XMLGitHubRepository xmlGitHubRepository) {
+    public GitHubIssue findOrCreateGitHubIssue(JSONIssue jsonIssue, XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubIssue gitHubIssue = descriptorCache.get(
-            IssueID.builder()
-                .repoUser(xmlGitHubRepository.getUser())
-                .repoName(xmlGitHubRepository.getName())
-                .issueNumber(jsonIssue.getNumber())
-                .build());
+        IssueID issueID = IssueID.builder()
+            .repoUser(xmlGitHubRepository.getUser())
+            .repoName(xmlGitHubRepository.getName())
+            .issueNumber(jsonIssue.getNumber())
+            .build();
+
+        GitHubIssue gitHubIssue = descriptorCache.get(issueID);
 
         if (gitHubIssue == null) {
             LOGGER.debug("Creating new issue: " + jsonIssue);
@@ -143,7 +143,7 @@ public class CacheEndpoint {
             gitHubIssue.setState(jsonIssue.getState());
             gitHubIssue.setTitle(jsonIssue.getTitle());
 
-            descriptorCache.put(gitHubIssue, xmlGitHubRepository.getUser(), xmlGitHubRepository.getName());
+            descriptorCache.put(gitHubIssue, issueID);
         }
 
         return gitHubIssue;
@@ -206,11 +206,13 @@ public class CacheEndpoint {
      */
     public GitHubMilestone findOrCreateGitHubMilestone(JSONMilestone jsonMilestone, XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubMilestone milestone = descriptorCache.get(
-            MilestoneID.builder().repoUser(xmlGitHubRepository.getUser())
-                .repoName(xmlGitHubRepository.getName())
-                .milestoneNumber(jsonMilestone.getNumber())
-                .build());
+        MilestoneID milestoneID = MilestoneID.builder()
+            .repoUser(xmlGitHubRepository.getUser())
+            .repoName(xmlGitHubRepository.getName())
+            .milestoneNumber(jsonMilestone.getNumber())
+            .build();
+
+        GitHubMilestone milestone = descriptorCache.get(milestoneID);
 
         if (milestone == null) {
             LOGGER.debug("Creating new milestone: " + jsonMilestone);
@@ -231,7 +233,7 @@ public class CacheEndpoint {
 
             milestone.setCreatedBy(findOrCreateGitHubUser(jsonMilestone.getCreator()));
 
-            descriptorCache.put(milestone, xmlGitHubRepository.getUser(), xmlGitHubRepository.getName());
+            descriptorCache.put(milestone, milestoneID);
         }
 
         return milestone;
@@ -247,12 +249,13 @@ public class CacheEndpoint {
      */
     public GitHubCommit findOrCreateGitHubCommit(String repoUser, String repoName, String commitSha) {
 
-        GitHubCommit commit = descriptorCache.get(
-            CommitID.builder()
-                .repoUser(repoUser)
-                .repoName(repoName)
-                .commitSha(commitSha)
-                .build());
+        CommitID commitID = CommitID.builder()
+            .repoUser(repoUser)
+            .repoName(repoName)
+            .commitSha(commitSha)
+            .build();
+
+        GitHubCommit commit = descriptorCache.get(commitID);
 
         if (commit == null) {
 
@@ -261,7 +264,7 @@ public class CacheEndpoint {
             commit.setId(repoUser + "/" + repoName + "#" + commitSha);
             commit.setSha(commitSha);
 
-            descriptorCache.put(commit, repoUser, repoName);
+            descriptorCache.put(commit, commitID);
         }
 
         return commit;
@@ -277,12 +280,13 @@ public class CacheEndpoint {
      */
     public GitHubComment findOrCreateGitHubComment(JSONComment jsonComment, XMLGitHubRepository xmlGitHubRepository) {
 
-        GitHubComment comment = descriptorCache.get(
-            CommentID.builder()
-                .repoUser(xmlGitHubRepository.getUser())
-                .repoName(xmlGitHubRepository.getName())
-                .commentId(jsonComment.getId())
-                .build());
+        CommentID commentID = CommentID.builder()
+            .repoUser(xmlGitHubRepository.getUser())
+            .repoName(xmlGitHubRepository.getName())
+            .commentId(jsonComment.getId())
+            .build();
+
+        GitHubComment comment = descriptorCache.get(commentID);
 
         if (comment == null) {
             LOGGER.debug("Creating new comment: " + jsonComment);
@@ -295,7 +299,7 @@ public class CacheEndpoint {
 
             comment.setUser(findOrCreateGitHubUser(jsonComment.getUser()));
 
-            descriptorCache.put(comment, xmlGitHubRepository.getUser(), xmlGitHubRepository.getName());
+            descriptorCache.put(comment, commentID);
         }
 
         return comment;

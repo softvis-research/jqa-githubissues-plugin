@@ -3,8 +3,6 @@ package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 import org.jqassistant.contrib.plugin.githubissues.ids.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
@@ -14,8 +12,6 @@ import java.util.HashMap;
  * For more information see {@link CacheEndpoint} which is the public accessible interface for this cache.
  */
 class DescriptorCache {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DescriptorCache.class);
 
     private HashMap<RepositoryID, GitHubRepository> repositories;
     private HashMap<CommitID, GitHubCommit> commits;
@@ -71,89 +67,68 @@ class DescriptorCache {
         return comments.get(commentID);
     }
 
+    /*
+    PUT-Functions for which the descriptor contains its ID information:
+     */
+
     void put(GitHubUser user) {
 
-        UserID key = UserID.builder()
+        UserID userID = UserID.builder()
             .login(user.getLogin())
             .build();
 
-        if (!users.containsKey(key)) {
-            users.put(key, user);
-        }
-    }
-
-    void put(GitHubMilestone milestone, String repoUser, String repoName) {
-
-        MilestoneID key = MilestoneID.builder()
-            .repoUser(repoUser)
-            .repoName(repoName)
-            .milestoneNumber(milestone.getNumber())
-            .build();
-
-        if (!milestones.containsKey(key)) {
-            milestones.put(key, milestone);
+        if (!users.containsKey(userID)) {
+            users.put(userID, user);
         }
     }
 
     void put(GitHubLabel label) {
 
-        LabelID key = LabelID.builder()
+        LabelID labelId = LabelID.builder()
             .name(label.getName())
             .build();
 
-        if (!labels.containsKey(key)) {
-            labels.put(key, label);
+        if (!labels.containsKey(labelId)) {
+            labels.put(labelId, label);
         }
     }
 
-    void put(GitHubRepository repository) {
+    /*
+    PUT-Functions with descriptors that need context information to identify them:
+     */
 
-        RepositoryID key = RepositoryID.builder()
-            .user(repository.getUser())
-            .name(repository.getName())
-            .build();
+    void put(GitHubMilestone milestone, MilestoneID milestoneID) {
 
-        if (!repositories.containsKey(key)) {
-            repositories.put(key, repository);
+        if (!milestones.containsKey(milestoneID)) {
+            milestones.put(milestoneID, milestone);
         }
     }
 
-    void put(GitHubCommit commit, String repoUser, String repoName) {
+    void put(GitHubRepository repository, RepositoryID repositoryID) {
 
-        CommitID key = CommitID.builder()
-            .repoUser(repoUser)
-            .repoName(repoName)
-            .commitSha(commit.getSha())
-            .build();
-
-        if (!commits.containsKey(key)) {
-            commits.put(key, commit);
+        if (!repositories.containsKey(repositoryID)) {
+            repositories.put(repositoryID, repository);
         }
     }
 
-    void put(GitHubIssue issue, String repoUser, String repoName) {
+    void put(GitHubCommit commit, CommitID commitID) {
 
-        IssueID key = IssueID.builder()
-            .repoUser(repoUser)
-            .repoName(repoName)
-            .issueNumber(issue.getNumber())
-            .build();
-
-        if (!issues.containsKey(key)) {
-            issues.put(key, issue);
+        if (!commits.containsKey(commitID)) {
+            commits.put(commitID, commit);
         }
     }
 
-    void put(GitHubComment comment, String repoUser, String repoName) {
+    void put(GitHubIssue issue, IssueID issueID) {
 
-        CommentID key = CommentID.builder()
-            .repoUser(repoUser)
-            .repoName(repoName)
-            .commentId(comment.getId())
-            .build();
+        if (!issues.containsKey(issueID)) {
+            issues.put(issueID, issue);
+        }
+    }
 
-        if (!comments.containsKey(key)) {
-            comments.put(key, comment);
+    void put(GitHubComment comment, CommentID commentID) {
+
+        if (!comments.containsKey(commentID)) {
+            comments.put(commentID, comment);
         }
     }
 }
