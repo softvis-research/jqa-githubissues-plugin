@@ -12,7 +12,7 @@ It enables jQAssistant to scan and analyze GitHub issues.
 To use the __GitHub-Issues__ plugin create a file named `githubissues.xml`. 
 The plugin can scan multiple repositories owned by different users. Please note that
 the [GitHub REST-API](https://developer.github.com/v3/) requires login credentials to
-access any of its functions. Therefore, login credentials can be provided per 
+access any of its functions. Therefore, login credentials must be provided per 
 repository.
 
 ```xml
@@ -55,6 +55,7 @@ The __GitHub-Issues__ plugin uses the following labels in the resulting graph:
 
 | Label | Description                                                  | ID |
 | ----- | ------------------------------------------------------------ |----|
+|GitHub-Issues-Configuration-File|A configuration file for the plugin.| - |
 |GitHub |Parent label for all nodes related to the GitHub-Issues plugin.| -|
 |Repository|Represents a GitHub Repository.| "repo-user/repo-name"|
 |Issue|Represents a GitHub Issue.| "repo-user/repo-name#issue-number" |
@@ -67,21 +68,27 @@ The __GitHub-Issues__ plugin uses the following labels in the resulting graph:
 Here are the possible relations between those labels:
 
 ```java
-(Repository)  -[:HAS_ISSUE]       ->    (Issue)
-(Repository)  -[:HAS_MILESTONE]   ->    (Milestone)
+(GitHub-Issues-Configuration-File)  -[:SPECIFIES_REPOSITORY]    ->  (Repository)
 
-(Issue)       -[:HAS_LABEL]       ->    (Label)
-(Issue)       -[:HAS_COMMENT]     ->    (Comment)
-(Issue)       -[:HAS_ASSIGNEE]    ->    (User)
-(Issue)       -[:CREATED_BY]      ->    (User)
-(Issue)       -[:IS_PART_OF]      ->    (Milestone)
+(Repository)    -[:HAS_ISSUE]         ->    (Issue)
+(Repository)    -[:HAS_MILESTONE]     ->    (Milestone)
 
-(PullRequest) -[:HAS_LAST_COMMIT] ->    (Commit)
+(Issue)         -[:HAS_LABEL]         ->    (Label)
+(Issue)         -[:HAS_COMMENT]       ->    (Comment)
+(Issue)         -[:HAS_ASSIGNEE]      ->    (User)
+(Issue)         -[:CREATED_BY]        ->    (User)
+(Issue)         -[:IS_PART_OF]        ->    (Milestone)
 
-(Milestone)   -[:CREATED_BY]      ->    (User)
+(PullRequest)   -[:HAS_LAST_COMMIT]   ->    (Commit)
 
-(Comment)     -[:FOLLOWED_BY]     ->    (Comment)
-(Comment)     -[:CREATED_BY]      ->    (User)
+(Milestone)     -[:CREATED_BY]        ->    (User)
+
+(Comment)       -[:FOLLOWED_BY]       ->    (Comment)
+(Comment)       -[:CREATED_BY]        ->    (User)
+
+(Issue|Comment) -[:REFERENCES_ISSUE]  ->    (Issue)
+(Issue|Comment) -[:REFERENCES_COMMIT] ->    (Commit)
+(Issue|Comment) -[:REFERENCES_USER]   ->    (User)
 ```
 
 ## Use Cases
@@ -197,8 +204,30 @@ RETURN
 ```
 &rarr; If not, then probably no one feels responsible for this issue.
 
+## Known Problems
 
-## Development
+### Performance
+
+The performance of the plugin is limited by the GitHub REST API. We are not allowed to make more than one request
+per second. See [this](https://developer.github.com/v3/guides/best-practices-for-integrators/#dealing-with-abuse-rate-limits)
+for more information. For each __Issue__ and every __Comment__ the body text gets parsed to HTML by 
+[this endpoint](https://developer.github.com/v3/markdown/#render-an-arbitrary-markdown-document).
+We need to do this to resolve references to __User__, __Commits__ and __Commits__ in the markdown texts.
+
+That is why a analysis of ~1800 issues can take a few hours.
+
+### Only one configuration file
+
+At the moment only one configuration file is supported. When you scan more than one at a time nodes representing the
+same real world entity won't be identified. Furthermore, the plugin doesn't print a warning so be careful
+to avoid wrong analyses of your repositories!
+
+### Did you find a bug?
+
+Please have a look at the issue section in GitHub. If you can't find your bug open a ticket
+with an reproducible example and your error logs.
+
+## Contribution
 
 If you want to contribute here are a few tips to get you started:
 
