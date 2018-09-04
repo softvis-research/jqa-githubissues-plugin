@@ -10,8 +10,8 @@ import java.time.ZonedDateTime;
 public interface GitHubComment extends GitHub, GitHubMarkdownPointer, GitHubTimestamps {
 
     @Property("commentId")
-    String getCommentId();
-    void setCommentId(String CommentId);
+    long getCommentId();
+    void setCommentId(long commentId);
 
     @Property("body")
     String getBody();

@@ -1,14 +1,12 @@
 package org.jqassistant.contrib.plugin.githubissues.toolbox.cache;
 
 
-import org.jqassistant.contrib.plugin.githubissues.ids.CommitId;
-import org.jqassistant.contrib.plugin.githubissues.ids.RepositoryId;
-import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
-import org.jqassistant.contrib.plugin.githubissues.json.*;
+import org.jqassistant.contrib.plugin.githubissues.ids.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class caches descriptor instances which have already been created.
@@ -17,13 +15,15 @@ import java.util.Map;
  */
 class DescriptorCache {
 
-    private HashMap<RepositoryId, GitHubRepository> repositories;
-    private HashMap<CommitId, GitHubCommit> commits;
-    private HashMap<String, GitHubIssue> issues;
-    private HashMap<String, GitHubComment> comments;
-    private HashMap<String, GitHubUser> users;
-    private HashMap<String, GitHubLabel> labels;
-    private HashMap<String, GitHubMilestone> milestones;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DescriptorCache.class);
+
+    private HashMap<RepositoryID, GitHubRepository> repositories;
+    private HashMap<CommitID, GitHubCommit> commits;
+    private HashMap<IssueID, GitHubIssue> issues;
+    private HashMap<CommentID, GitHubComment> comments;
+    private HashMap<UserID, GitHubUser> users;
+    private HashMap<LabelID, GitHubLabel> labels;
+    private HashMap<MilestoneID, GitHubMilestone> milestones;
 
     DescriptorCache() {
 
@@ -36,115 +36,124 @@ class DescriptorCache {
         comments = new HashMap<>();
     }
 
-    GitHubMilestone get(JSONMilestone milestone, XMLGitHubRepository xmlGitHubRepository) {
+    GitHubMilestone get(MilestoneID milestoneID) {
 
-        return milestones.get(xmlGitHubRepository.getUser() +
-            "/" + xmlGitHubRepository.getName() +
-            "#" + milestone.getNumber());
+        return milestones.get(milestoneID);
     }
 
-    GitHubUser get(JSONUser user) {
+    GitHubUser get(UserID userID) {
 
-        return users.get(user.getLogin());
+        return users.get(userID);
     }
 
-    GitHubLabel get(JSONLabel label) {
+    GitHubLabel get(LabelID labelID) {
 
-        return labels.get(label.getName());
+        return labels.get(labelID);
     }
 
-    GitHubRepository get(XMLGitHubRepository xmlGitHubRepository) {
+    GitHubRepository get(RepositoryID repositoryID) {
 
-        return repositories.get(new RepositoryId(xmlGitHubRepository));
+        return repositories.get(repositoryID);
     }
 
-    /**
-     * Matching commits is more complex than matching other entities:
-     * <p>
-     * Even if the GitHub-REST API is used to resolve markdown references the following issue can occur:
-     * <p>
-     * "kontext-e/jqassistant-plugins@a00cd018208b04caa08a32f970067cf8ec837eb8" and
-     * "kontext-e/jqassistant-plugins@a00cd01" point at the same commit. Still, the GitHub API parses
-     * them to different hrefs:
-     * ../commit/a00cd018208b04caa08a32f970067cf8ec837eb8 and ../commit/a00cd01.
-     * <p>
-     * Therefore, we need to check if one of the commit hashes is a prefix of the other.
-     *
-     * @param repoUser  The repository user.
-     * @param repoName  The repository name.
-     * @param commitSha The commit hash.
-     * @return The cached GitHubCommit or Null if it does not exist yet.
-     */
-    GitHubCommit getCommit(String repoUser, String repoName, String commitSha) {
+    GitHubCommit get(CommitID commitID) {
 
-        return commits.get(new CommitId(repoUser, repoName, commitSha));
+        return commits.get(commitID);
     }
 
-    GitHubIssue get(JSONIssue issue, XMLGitHubRepository xmlGitHubRepository) {
+    GitHubIssue get(IssueID issueID) {
 
-        return issues.get(xmlGitHubRepository.getUser() + "/" + xmlGitHubRepository.getName() + "#" + issue.getNumber());
+        return issues.get(issueID);
     }
 
-    GitHubComment get(JSONComment comment, XMLGitHubRepository xmlGitHubRepository) {
+    GitHubComment get(CommentID commentID) {
 
-        return comments.get(xmlGitHubRepository.getUser() +
-            "/" + xmlGitHubRepository.getName() +
-            "/comment#" + comment.getId());
-    }
-
-    GitHubIssue getIssue(String repoUser, String repoName, String issueNumber) {
-
-        return issues.get(repoUser + "/" + repoName + "#" + issueNumber);
+        return comments.get(commentID);
     }
 
     void put(GitHubUser user) {
 
-        if (!users.containsKey(user.getLogin())) {
-            users.put(user.getLogin(), user);
+        UserID key = UserID.builder()
+            .login(user.getLogin())
+            .build();
+
+        if (!users.containsKey(key)) {
+            users.put(key, user);
         }
     }
 
-    void put(GitHubMilestone milestone) {
+    void put(GitHubMilestone milestone, String repoUser, String repoName) {
 
-        if (!milestones.containsKey(milestone.getMilestoneId())) {
-            milestones.put(milestone.getMilestoneId(), milestone);
+        MilestoneID key = MilestoneID.builder()
+            .repoUser(repoUser)
+            .repoName(repoName)
+            .milestoneNumber(milestone.getNumber())
+            .build();
+
+        if (!milestones.containsKey(key)) {
+            milestones.put(key, milestone);
         }
     }
 
     void put(GitHubLabel label) {
 
-        if (!labels.containsKey(label.getName())) {
-            labels.put(label.getName(), label);
+        LabelID key = LabelID.builder()
+            .name(label.getName())
+            .build();
+
+        if (!labels.containsKey(key)) {
+            labels.put(key, label);
         }
     }
 
     void put(GitHubRepository repository) {
 
-        RepositoryId key = new RepositoryId(repository);
+        RepositoryID key = RepositoryID.builder()
+            .user(repository.getUser())
+            .name(repository.getName())
+            .build();
 
         if (!repositories.containsKey(key)) {
             repositories.put(key, repository);
         }
     }
 
-    void put(GitHubCommit commit) {
+    void put(GitHubCommit commit, String repoUser, String repoName) {
 
-        if (!commits.containsKey(commit.getId())) {
-            commits.put(commit.getId(), commit);
+        CommitID key = CommitID.builder()
+            .repoUser(repoUser)
+            .repoName(repoName)
+            .commitSha(commit.getSha())
+            .build();
+
+        if (!commits.containsKey(key)) {
+            commits.put(key, commit);
         }
     }
 
-    void put(GitHubIssue issue) {
+    void put(GitHubIssue issue, String repoUser, String repoName) {
 
-        if (!issues.containsKey(issue.getIssueId())) {
-            issues.put(issue.getIssueId(), issue);
+        IssueID key = IssueID.builder()
+            .repoUser(repoUser)
+            .repoName(repoName)
+            .issueNumber(issue.getNumber())
+            .build();
+
+        if (!issues.containsKey(key)) {
+            issues.put(key, issue);
         }
     }
 
-    void put(GitHubComment comment) {
+    void put(GitHubComment comment, String repoUser, String repoName) {
 
-        if (!comments.containsKey(comment.getCommentId())) {
-            comments.put(comment.getCommentId(), comment);
+        CommentID key = CommentID.builder()
+            .repoUser(repoUser)
+            .repoName(repoName)
+            .commentId(comment.getId())
+            .build();
+
+        if (!comments.containsKey(key)) {
+            comments.put(key, comment);
         }
     }
 }

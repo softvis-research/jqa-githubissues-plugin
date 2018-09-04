@@ -59,7 +59,7 @@ public class RestTool {
      */
     public JSONIssue requestIssueByRepositoryAndNumber(String repoUser,
                                                        String repoName,
-                                                       String issueNumber) throws IOException {
+                                                       int issueNumber) throws IOException {
 
         WebResource issueWebResource = client.resource(
             apiUrl + "repos/" + repoUser + "/" +

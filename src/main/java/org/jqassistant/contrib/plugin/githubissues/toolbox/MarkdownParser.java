@@ -76,7 +76,7 @@ public class MarkdownParser {
                     cacheEndpoint.findOrCreateGitHubIssue(
                         hrefCut.get(0),
                         hrefCut.get(1),
-                        hrefCut.get(2),
+                        Integer.parseInt(hrefCut.get(2)),
                         xmlGitHubRepository,
                         restTool));
             }

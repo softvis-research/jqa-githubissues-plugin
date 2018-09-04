@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 public class JSONComment {
 
-    private int id;
+    private long id;
 
     private String body;
 
