@@ -47,6 +47,71 @@ public class RestTool {
         this.xmlGitHubRepository = xmlGitHubRepository;
     }
 
+    /**
+     * Every request that returns a failure needs to be catched and logged.
+     *
+     * @param webResource The request web resource.
+     * @param response The response that shall be checked.
+     * @return The entity of the response if no error occurs, null otherwise.
+     * @throws RequestFailedException If a request error occurs.
+     */
+    private String raiseErrorsIfNeeded(WebResource webResource, ClientResponse response) throws RequestFailedException {
+
+        if (response.getStatus() == 200) {
+            return response.getEntity(String.class);
+        }
+
+        StringBuilder headers = new StringBuilder();
+
+        // Build HEADERS string:
+        for (Map.Entry<String, List<String>> entry : response.getHeaders().entrySet()) {
+
+            headers.append("  ");
+            headers.append(entry.getKey());
+            headers.append(System.lineSeparator());
+
+            for (String v : entry.getValue()) {
+                headers.append("  - ");
+                headers.append(v);
+                headers.append(System.lineSeparator());
+            }
+
+            headers.append(System.lineSeparator());
+        }
+
+        throw new RequestFailedException("REST request failed:\n\n" +
+            "Status: " + response.getStatus() + "\n" +
+            "Headers: \n\n" +
+            headers.toString() + "\n\n" +
+            "Entity: \n" +
+            response.getEntity(String.class) + "\n" +
+            "Request: \n" +
+            "> URL: \"" + webResource.getURI().toString() + "\"\n");
+    }
+
+    /**
+     * Adds a POST entity to the logging message. See {@link #raiseErrorsIfNeeded(WebResource, ClientResponse)} for
+     * more information.
+     *
+     * @param webResource The request web resource.
+     * @param response The response that shall be checked.
+     * @param entity A POST request payload.
+     * @return The entity of the response if no error occurs, null otherwise.
+     * @throws RequestFailedException If a request error occurs.
+     */
+    private String raiseErrorsIfNeeded(WebResource webResource, ClientResponse response, String entity) throws RequestFailedException {
+
+        try {
+            return raiseErrorsIfNeeded(webResource, response);
+        } catch(RequestFailedException e) {
+            throw new RequestFailedException(e.getMessage() +
+                "> Entity:" +
+                "\n----------------------\n" +
+                entity +
+                "\n----------------------\n");
+        }
+    }
+
 
     /**
      * Requests one specific issue.
@@ -54,19 +119,22 @@ public class RestTool {
      * @param repoUser    The owner of the repository.
      * @param repoName    The name of the repository.
      * @param issueNumber The number of the issue.
-     * @return The response as JSON-POJO.
+     * @return The response as JSON-POJO or null if the request failed.
      * @see <a href="https://developer.github.com/v3/issues/#get-a-single-issue">REST-API</a>
      */
     public JSONIssue requestIssueByRepositoryAndNumber(String repoUser,
                                                        String repoName,
-                                                       int issueNumber) throws IOException {
+                                                       int issueNumber) throws IOException, RequestFailedException {
 
         WebResource issueWebResource = client.resource(
             apiUrl + "repos/" + repoUser + "/" +
                 repoName + "/issues/" + issueNumber);
 
-        return JSONParser.getInstance().parseIssue(
-            issueWebResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class));
+        String response = raiseErrorsIfNeeded(issueWebResource, issueWebResource
+            .accept(MediaType.APPLICATION_JSON_TYPE)
+            .get(ClientResponse.class));
+
+        return JSONParser.getInstance().parseIssue(response);
     }
 
     /**
@@ -126,9 +194,20 @@ public class RestTool {
             }
 
             clientResponse = webResource.get(ClientResponse.class);
-            nextPaginationUrl = getNextPaginationUrl(clientResponse);
 
-            jsonStrings.add(clientResponse.getEntity(String.class));
+            String entity;
+            try {
+
+                entity = raiseErrorsIfNeeded(webResource, clientResponse);
+            } catch (RequestFailedException e) {
+
+                // If an error occurs:
+                LOGGER.warn("Pagination REST failure:", e);
+                return jsonStrings;
+            }
+
+            nextPaginationUrl = getNextPaginationUrl(clientResponse);
+            jsonStrings.add(entity);
 
         } while (nextPaginationUrl != null);
 
@@ -235,15 +314,17 @@ public class RestTool {
      * about this pull request.
      *
      * @param url An absolute url as String.
-     * @return The response as JSON-POJO.
+     * @return The response as JSON-POJO or null if the request failed.
      * @see <a href="https://developer.github.com/v3/pulls/#get-a-single-pull-request">REST-API</a>
      */
-    public JSONIssue requestPullRequestByAbsoluteUrl(String url) throws IOException {
+    public JSONIssue requestPullRequestByAbsoluteUrl(String url) throws IOException, RequestFailedException {
 
         WebResource webResource = client.resource(url);
 
-        return JSONParser.getInstance().parsePullRequest(
-            webResource.accept(MediaType.APPLICATION_JSON_TYPE).get(String.class));
+        String entity = raiseErrorsIfNeeded(webResource,
+            webResource.accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class));
+
+        return JSONParser.getInstance().parsePullRequest(entity);
     }
 
     /**
@@ -257,11 +338,11 @@ public class RestTool {
      * </ul>
      *
      * @param markdown The markdown that shall be converted.
-     * @return The response as HTML-String.
+     * @return The response as HTML-String or an empty String if the request failed.
      * @throws JsonProcessingException If the org.jqassistant.contrib.plugin.githubissues.json creation for the request payload fails.
      * @see <a href="https://developer.github.com/v3/markdown/#render-an-arbitrary-markdown-document">REST-API</a>
      */
-    String requestMarkdownToHtml(String markdown) throws JsonProcessingException {
+    String requestMarkdownToHtml(String markdown) throws JsonProcessingException, RequestFailedException {
 
         WebResource webResource = client.resource(apiUrl + "markdown");
 
@@ -269,6 +350,9 @@ public class RestTool {
 
         String json = JSONParser.getInstance().parseMarkdownRequest(jsonMarkdownRequest);
 
-        return webResource.accept(MediaType.APPLICATION_JSON_TYPE).post(String.class, json);
+        return raiseErrorsIfNeeded(
+            webResource,
+            webResource.accept(MediaType.APPLICATION_JSON_TYPE).post(ClientResponse.class, json),
+            json);
     }
 }

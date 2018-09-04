@@ -7,6 +7,7 @@ import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.MarkdownParser;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.RequestFailedException;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
 import org.slf4j.Logger;
@@ -101,9 +102,12 @@ class GraphBuilder {
 
             LOGGER.info("Importing issue: " + id + ", \"" + jsonIssue.getTitle() + "\"");
 
-            GitHubIssue gitHubIssue = issueLevel(jsonIssue, xmlGitHubRepository, restTool);
-
-            gitHubRepository.getContains().add(gitHubIssue);
+            try {
+                GitHubIssue gitHubIssue = issueLevel(jsonIssue, xmlGitHubRepository, restTool);
+                gitHubRepository.getContains().add(gitHubIssue);
+            } catch (RequestFailedException e) {
+                LOGGER.warn("Couldn't import issue because of a REST failure:\n" + jsonIssue + "\n", e);
+            }
         }
     }
 
@@ -118,7 +122,7 @@ class GraphBuilder {
      */
     private GitHubIssue issueLevel(JSONIssue jsonIssue,
                                    XMLGitHubRepository xmlGitHubRepository,
-                                   RestTool restTool) throws IOException {
+                                   RestTool restTool) throws IOException, RequestFailedException {
 
         GitHubIssue gitHubIssue = cacheEndpoint.findOrCreateGitHubIssue(jsonIssue, xmlGitHubRepository);
 
@@ -149,12 +153,16 @@ class GraphBuilder {
                 gitHubPullRequest.setMergedAt(ZonedDateTime.parse(jsonPullRequest.getMergedAt()));
             }
 
-            GitHubCommit gitHubCommit = cacheEndpoint.findOrCreateGitHubCommit(
-                xmlGitHubRepository.getUser(),
-                xmlGitHubRepository.getName(),
-                jsonPullRequest.getMergeCommitSha());
+            // If the pull request got merged get the merge commit:
+            if (jsonPullRequest.getMergeCommitSha() != null) {
 
-            gitHubPullRequest.setLastCommit(gitHubCommit);
+                GitHubCommit gitHubCommit = cacheEndpoint.findOrCreateGitHubCommit(
+                    xmlGitHubRepository.getUser(),
+                    xmlGitHubRepository.getName(),
+                    jsonPullRequest.getMergeCommitSha());
+
+                gitHubPullRequest.setLastCommit(gitHubCommit);
+            }
         }
 
         for (JSONUser jsonAssignee : jsonIssue.getAssignees()) {

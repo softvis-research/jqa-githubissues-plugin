@@ -110,6 +110,8 @@ public class MarkdownParser {
             LOGGER.error("Header Retry-After: " + e.getResponse().getHeaders().get("Retry-After") + " s");
         } catch (InterruptedException e) {
             LOGGER.error("InterruptedException: ", e);
+        } catch (RequestFailedException e) {
+            LOGGER.warn("Markdown request failed:", e);
         }
     }
 

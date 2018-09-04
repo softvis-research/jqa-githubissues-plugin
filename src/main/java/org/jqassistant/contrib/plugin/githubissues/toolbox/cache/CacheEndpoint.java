@@ -5,6 +5,7 @@ import org.jqassistant.contrib.plugin.githubissues.ids.*;
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLGitHubRepository;
 import org.jqassistant.contrib.plugin.githubissues.json.*;
 import org.jqassistant.contrib.plugin.githubissues.model.*;
+import org.jqassistant.contrib.plugin.githubissues.toolbox.RequestFailedException;
 import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,7 @@ public class CacheEndpoint {
         String repoName,
         int issueNumber,
         XMLGitHubRepository xmlGitHubRepository,
-        RestTool restTool) throws IOException {
+        RestTool restTool) throws IOException, RequestFailedException {
 
         GitHubIssue gitHubIssue = descriptorCache.get(
             IssueID.builder()

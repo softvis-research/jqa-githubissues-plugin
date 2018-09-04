@@ -136,7 +136,7 @@
                 <configuration>
                     <formats>
                         <format>html</format>
-                        <format>githubissues.xml</format>
+                        <format>xml</format>
                     </formats>
                     <check/>
                 </configuration>
