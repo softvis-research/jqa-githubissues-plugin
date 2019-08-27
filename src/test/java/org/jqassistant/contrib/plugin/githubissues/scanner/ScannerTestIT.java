@@ -1,17 +1,14 @@
 package org.jqassistant.contrib.plugin.githubissues.scanner;
 
 import com.buschmais.jqassistant.core.scanner.api.DefaultScope;
-import com.buschmais.jqassistant.core.scanner.api.Scanner;
 import com.buschmais.jqassistant.core.store.api.model.Descriptor;
 import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.jqassistant.contrib.plugin.githubissues.model.GitHub;
 import org.hamcrest.CoreMatchers;
 import org.jqassistant.contrib.plugin.githubissues.model.GitHubIssuesConfigurationFile;
+import org.jqassistant.contrib.plugin.githubissues.scanner.stubbing.StubbingTool;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jqassistant.contrib.plugin.githubissues.scanner.stubbing.StubbingTool;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.RestTool;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +17,7 @@ import java.util.Objects;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-public class ScannerTest extends AbstractPluginIT {
+public class ScannerTestIT extends AbstractPluginIT {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8089);
