@@ -4,12 +4,17 @@
 [![Build Status](https://travis-ci.com/softvis-research/jqa-githubissues-plugin.svg?branch=master)](https://travis-ci.com/softvis-research/jqa-githubissues-plugin)
 [![codecov](https://codecov.io/gh/softvis-research/jqa-githubissues-plugin/branch/master/graph/badge.svg)](https://codecov.io/gh/softvis-research/jqa-githubissues-plugin)
 
-This is a GitHub issue scanner for [jQAssistant](https://jqassistant.org/). 
-It enables jQAssistant to scan and analyze GitHub issues.
+This is a [GitHub](https://github.com/) issue scanner for [jQAssistant](https://jqassistant.org/). 
+It enables jQAssistant to scan and analyze [GitHub](https://github.com/) issues.
 
 ## Getting Started
 
-To use the __GitHub-Issues__ plugin create a file named `githubissues.xml`. 
+Download the jQAssistant command line tool for your system: [jQAssistant - Get Started](https://jqassistant.org/get-started/).
+
+Next download the latest version from the release tab. Put the `jqa-githubissues-plugin-*.jar` into the plugins folder 
+of the jQAssistant commandline tool.
+
+Create a file named `githubissues.xml`. 
 The plugin can scan multiple repositories owned by different users. Please note that
 the [GitHub REST-API](https://developer.github.com/v3/) requires login credentials to
 access any of its functions. Therefore, login credentials must be provided per 
@@ -33,20 +38,16 @@ repository.
 </github-issues-configuration>
 ```
 
-Put the `githubissues.xml` inside an artifact that shall be scanned 
-or simply scan it standalone:
-
-
-### Standalone 
-Download [jQAssistant](https://jqassistant.org/get-started/) for command line usage
-and put the plugin _JAR_ in the `plugins` folder. Then run:
+Now scan your configuration and wait for the plugin to finish:
 
 ```bash
-# Scan the GitHub-Repositories
-jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh scan -f githubissues.xml
+jqassistant.sh scan -f githubissues.xml
+```
 
-# Start a Neo4J web UI to explore the result: 
-jqassistant-commandline-neo4jv3-1.4.0/bin/jqassistant.sh server
+You can then start a local Neo4j server to start querying the database at [http://localhost:7474](http://localhost:7474):
+
+```bash
+jqassistant.sh server
 ```
 
 ## Labels

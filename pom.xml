@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jqassistant.contrib.common</groupId>
         <artifactId>parent</artifactId>
-        <version>1.6.0</version>
+        <version>1.7.0</version>
     </parent>
 
     <developers>
@@ -29,11 +29,18 @@
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqa-githubissues-plugin</artifactId>
-    <version>0.3</version>
+    <version>0.0.4</version>
 
     <name>jQAssistant GitHub-Issues Plugin</name>
     <description>The jQAssistant plugin to scan and to analyze a GitHub-Issues.</description>
     <url>http://jqassistant.org/</url>
+
+    <scm>
+        <connection>scm:git:git@github.com:softvis-research/jqa-githubissues-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:softvis-research/jqa-githubissues-plugin.git</developerConnection>
+        <url>https://github.com/softvis-research/jqa-githubissues-plugin.git</url>
+        <tag>HEAD</tag>
+    </scm>
 
 
     <properties>
