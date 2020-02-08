@@ -9,5 +9,5 @@ dependency-reduced-pom.xml
 # jQAssistant execution:
 run/
 test-project/
-jqassistant/store/
+jqassistant/
 

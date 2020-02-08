@@ -51,7 +51,7 @@ public class RestTool {
      * Every request that returns a failure needs to be catched and logged.
      *
      * @param webResource The request web resource.
-     * @param response The response that shall be checked.
+     * @param response    The response that shall be checked.
      * @return The entity of the response if no error occurs, null otherwise.
      * @throws RequestFailedException If a request error occurs.
      */
@@ -94,8 +94,8 @@ public class RestTool {
      * more information.
      *
      * @param webResource The request web resource.
-     * @param response The response that shall be checked.
-     * @param entity A POST request payload.
+     * @param response    The response that shall be checked.
+     * @param entity      A POST request payload.
      * @return The entity of the response if no error occurs, null otherwise.
      * @throws RequestFailedException If a request error occurs.
      */
@@ -103,7 +103,7 @@ public class RestTool {
 
         try {
             return raiseErrorsIfNeeded(webResource, response);
-        } catch(RequestFailedException e) {
+        } catch (RequestFailedException e) {
             throw new RequestFailedException(e.getMessage() +
                 "> Entity:" +
                 "\n----------------------\n" +
@@ -120,6 +120,8 @@ public class RestTool {
      * @param repoName    The name of the repository.
      * @param issueNumber The number of the issue.
      * @return The response as JSON-POJO or null if the request failed.
+     * @throws IOException            If parsing the response fails.
+     * @throws RequestFailedException If the request fails.
      * @see <a href="https://developer.github.com/v3/issues/#get-a-single-issue">REST-API</a>
      */
     public JSONIssue requestIssueByRepositoryAndNumber(String repoUser,
@@ -142,6 +144,7 @@ public class RestTool {
      *
      * @param gitHubRepository The repository descriptor for which the issues shall be retrieved.
      * @return The response as JSON-POJOs.
+     * @throws IOException If parsing the response fails.
      * @see <a href="https://developer.github.com/v3/issues/#list-issues-for-a-repository">REST-API</a>
      */
     public List<JSONIssue> requestIssuesByRepository(GitHubRepository gitHubRepository) throws IOException {
@@ -266,6 +269,7 @@ public class RestTool {
      *
      * @param gitHubIssueDescriptor The issue descriptor for which the comments shall be retrieved.
      * @return The response as JSON-POJOs.
+     * @throws IOException If parsing the response fails.
      * @see <a href="https://developer.github.com/v3/issues/comments/#list-comments-on-an-issue">REST-API</a>
      */
     public List<JSONComment> requestCommentsByIssue(GitHubIssue gitHubIssueDescriptor) throws IOException {
@@ -290,6 +294,7 @@ public class RestTool {
      * @param gitHubRepository The repository descriptor for which the milestones shall be
      *                         retrieved.
      * @return The response as JSON-POJOs.
+     * @throws IOException If parsing the response fails.
      * @see <a href="https://developer.github.com/v3/issues/milestones/#list-milestones-for-a-repository">REST-API</a>
      */
     public List<JSONMilestone> requestMilestonesByRepository(GitHubRepository gitHubRepository) throws IOException {
@@ -312,9 +317,12 @@ public class RestTool {
      * Requests JSON from an absolute URL. This is used for issues that are also pull requests.
      * They contain a <b>pull_request</b> property which is an url pointing at more information
      * about this pull request.
+     * <p>
      *
      * @param url An absolute url as String.
      * @return The response as JSON-POJO or null if the request failed.
+     * @throws RequestFailedException If the request fails.
+     * @throws IOException            If parsing the response fails.
      * @see <a href="https://developer.github.com/v3/pulls/#get-a-single-pull-request">REST-API</a>
      */
     public JSONIssue requestPullRequestByAbsoluteUrl(String url) throws IOException, RequestFailedException {

@@ -34,6 +34,7 @@ public class MarkdownParser {
     private CacheEndpoint cacheEndpoint;
 
     /**
+     * <p>
      * This function parses bodies of descriptors that contain markdown information, e.g. issues
      * or comments.
      * </p>
@@ -48,6 +49,7 @@ public class MarkdownParser {
      * @param markdown              The markdown that shall be parsed.
      * @param gitHubMarkdownPointer The descriptor containing this markdown.
      * @param xmlGitHubRepository   The repository context from the plugin configuration.
+     * @param restTool              The tool to retrieve data from the GitHub API.
      * @throws IOException If the parsing of an issue request fails.
      */
     public void getReferencesInMarkdown(

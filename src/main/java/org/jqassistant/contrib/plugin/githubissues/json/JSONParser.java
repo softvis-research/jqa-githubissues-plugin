@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * The {@link JSONParser} class contains methods for every json response from the GitHub API that is
  * used in the GitHub-Issues plugin.
- *
+ * <p>
  * Furthermore, there is one function {@link #parseMarkdownRequest(JSONMarkdownRequest)} which does reverse parsing.
  * It is needed to post markdown requests to resolve references in the issue and comment bodies.
  */
@@ -26,6 +26,7 @@ public class JSONParser {
     }
 
     /**
+     * <p>
      * Json Parser is a singleton to avoid creating a {@link ObjectMapper} instance multiple times.
      * </p>
      * Therefore, it needs a getInstance() method to retrieve the singleton instance.
@@ -108,6 +109,7 @@ public class JSONParser {
      *
      * @param jsonMarkdownRequest The object to be parsed.
      * @return A JSON-string representing the markdown request.
+     * @throws JsonProcessingException If JSON processing fails.
      */
     public String parseMarkdownRequest(JSONMarkdownRequest jsonMarkdownRequest) throws JsonProcessingException {
 

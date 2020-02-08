@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 
 /**
+ * <p>
  * This class was written to handle nodes in the resulting graph that get referenced more than one
  * time. These nodes get cached in the {@link DescriptorCache}.
  * </p>
+ * <p>
  * All of the methods in this class work similar:
  * </p>
  * They check if a certain descriptor instance exists. If it does
@@ -66,6 +68,7 @@ public class CacheEndpoint {
     }
 
     /**
+     * <p>
      * Check for {@link GitHubIssue}.
      * </p>
      * This method works a little bit different as it only has the ID of the Issue. If it can't find
@@ -77,8 +80,10 @@ public class CacheEndpoint {
      * @param repoName            The name of the repository.
      * @param issueNumber         The number of the issue.
      * @param xmlGitHubRepository The plugin configuration for the current repository.
+     * @param restTool            The tool to retrieve data from the GitHub API.
      * @return The retrieved or newly created descriptor instance.
-     * @throws IOException If the parsing of the issue JSON failed.
+     * @throws IOException            If the parsing of the issue JSON failed.
+     * @throws RequestFailedException If the request fails.
      */
     public GitHubIssue findOrCreateGitHubIssue(
         String repoUser,
