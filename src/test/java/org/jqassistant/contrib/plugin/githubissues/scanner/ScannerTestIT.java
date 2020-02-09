@@ -3,25 +3,34 @@ package org.jqassistant.contrib.plugin.githubissues.scanner;
 import com.buschmais.jqassistant.core.scanner.api.DefaultScope;
 import com.buschmais.jqassistant.core.store.api.model.Descriptor;
 import com.buschmais.jqassistant.plugin.common.test.AbstractPluginIT;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.hamcrest.CoreMatchers;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import org.jqassistant.contrib.plugin.githubissues.model.GitHubIssuesConfigurationFile;
 import org.jqassistant.contrib.plugin.githubissues.scanner.stubbing.StubbingTool;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ScannerTestIT extends AbstractPluginIT {
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(8089);
+    WireMockServer wireMockServer;
 
+    @BeforeEach
+    public void setup () {
+        wireMockServer = new WireMockServer(8089);
+        wireMockServer.start();
+    }
+
+    @AfterEach
+    public void teardown () {
+        wireMockServer.stop();
+    }
 
     @Test
     public void scanGitHubIssues() throws IOException {
@@ -35,7 +44,7 @@ public class ScannerTestIT extends AbstractPluginIT {
 
         Descriptor descriptor = getScanner().scan(file, "/githubissues.xml", DefaultScope.NONE);
 
-        assertThat(descriptor, CoreMatchers.instanceOf(GitHubIssuesConfigurationFile.class));
+        assertThat(descriptor).isInstanceOf(GitHubIssuesConfigurationFile.class);
 
         GitHubIssuesConfigurationFile gitHubIssuesConfigurationFile = (GitHubIssuesConfigurationFile) descriptor;
         assertEquals(1, gitHubIssuesConfigurationFile.getRepositories().size());
