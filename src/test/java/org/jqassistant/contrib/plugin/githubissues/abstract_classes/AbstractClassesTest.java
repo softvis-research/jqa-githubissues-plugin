@@ -1,9 +1,7 @@
 package org.jqassistant.contrib.plugin.githubissues.abstract_classes;
 
 import org.jqassistant.contrib.plugin.githubissues.jdom.XMLParser;
-import org.junit.Test;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.MarkdownParser;
-import org.jqassistant.contrib.plugin.githubissues.toolbox.cache.CacheEndpoint;
+import org.junit.jupiter.api.Test;
 
 /**
  * Covers the following problem:
