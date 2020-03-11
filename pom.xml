@@ -29,7 +29,7 @@
 
     <groupId>org.jqassistant.contrib.plugin</groupId>
     <artifactId>jqa-githubissues-plugin</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 
     <name>jQAssistant GitHub-Issues Plugin</name>
     <description>The jQAssistant plugin to scan and to analyze a GitHub-Issues.</description>
